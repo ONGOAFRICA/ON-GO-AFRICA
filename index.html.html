@@ -1,0 +1,1821 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>ON-GO Africa</title>
+<style>
+/* ───── RESET & TOKENS ───── */
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --G:#00B574;--GD:#007A4D;--GL:#4DFFB0;--GB:rgba(0,181,116,.1);
+  --O:#FF6020;--OD:#CC4A13;--OB:rgba(255,96,32,.1);
+  --B:#2563EB;--BD:#1D4ED8;--BB:rgba(37,99,235,.1);
+  --R:#EF4444;--RB:rgba(239,68,68,.1);
+  --Y:#F59E0B;--YB:rgba(245,158,11,.1);
+  --INK:#111827;--INK2:#374151;--INK3:#6B7280;--INK4:#9CA3AF;
+  --BG:#F3F4F6;--BG2:#E5E7EB;--W:#fff;--BR:rgba(0,0,0,.08);
+  --SH:0 1px 3px rgba(0,0,0,.08);--SHL:0 8px 24px rgba(0,0,0,.12);
+  --R1:10px;--R2:14px;--R3:20px;
+  --F:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --FM:'SF Mono','Courier New',monospace
+}
+body{background:#1a1a2e;display:flex;align-items:center;justify-content:center;min-height:100svh;font-family:var(--F);overflow:hidden}
+/* ───── PHONE ───── */
+#app{
+  width:min(390px,100vw);height:min(844px,100svh);
+  background:var(--BG);position:relative;overflow:hidden;
+  display:flex;flex-direction:column;
+  box-shadow:0 0 0 1px rgba(255,255,255,.1),0 30px 80px rgba(0,0,0,.7);
+  border-radius:clamp(0px,4vw,44px)
+}
+/* ───── PAGES ───── */
+.P{position:absolute;inset:0;display:none;flex-direction:column;background:var(--BG)}
+.P.ON{display:flex}
+.SB{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}
+.SB::-webkit-scrollbar{display:none}
+/* ───── NAV ───── */
+.NAV{height:74px;flex-shrink:0;display:flex;align-items:flex-start;padding-top:8px;border-top:1px solid var(--BR);background:var(--W)}
+.NAV.H{display:none!important}
+.NT{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;border:none;background:none;cursor:pointer;font-family:var(--F);padding:6px 4px;border-radius:10px;transition:transform .15s}
+.NT:active{transform:scale(.87)}
+.NI{width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;transition:background .2s}
+.NL{font-size:10px;font-weight:600;color:var(--INK4)}
+.NT.ON .NL{color:var(--AC,var(--G))}
+.NT.ON .NI{background:var(--AB,var(--GB))}
+/* ───── MODALS ───── */
+.MV{position:absolute;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(6px);z-index:900;display:none;align-items:flex-end}
+.MV.ON{display:flex;animation:fadeIn .2s both}
+.MS{width:100%;background:var(--W);border-radius:22px 22px 0 0;padding:16px 20px 38px;max-height:90vh;overflow-y:auto;animation:slideUp .28s cubic-bezier(.34,1.2,.64,1)}
+.MS::-webkit-scrollbar{display:none}
+.MH{width:36px;height:4px;background:var(--BG2);border-radius:2px;margin:0 auto 16px}
+.MT{font-size:20px;font-weight:800;color:var(--INK);margin-bottom:4px}
+.MS2{font-size:13px;color:var(--INK3);margin-bottom:18px;line-height:1.65}
+/* ───── TOAST ───── */
+.TOAST{position:absolute;bottom:82px;left:12px;right:12px;padding:13px 15px;border-radius:13px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:9px;z-index:999;pointer-events:none;opacity:0;transform:translateY(10px);transition:all .3s cubic-bezier(.34,1.56,.64,1)}
+.TOAST.ON{opacity:1;transform:translateY(0)}
+.T-ok{background:#ECFDF5;border:1.5px solid #6EE7B7;color:#065F46}
+.T-err{background:#FEF2F2;border:1.5px solid #FCA5A5;color:#991B1B}
+.T-info{background:#EFF6FF;border:1.5px solid #93C5FD;color:#1E40AF}
+.T-warn{background:#FFFBEB;border:1.5px solid #FCD34D;color:#78350F}
+/* ───── ANIMS ───── */
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+@keyframes loadBar{0%{width:0}75%{width:80%}100%{width:100%}}
+@keyframes scanLine{0%,100%{top:8px}50%{top:128px}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes popIn{from{opacity:0;transform:scale(.88)}to{opacity:1;transform:scale(1)}}
+/* ───── COMPONENTS ───── */
+.btn{width:100%;padding:15px;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:var(--F);display:flex;align-items:center;justify-content:center;gap:8px;transition:all .18s}
+.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.45;transform:none!important;cursor:not-allowed}
+.bG{background:var(--G);color:#fff}
+.bO{background:var(--O);color:#fff}
+.bB{background:var(--B);color:#fff}
+.bR{background:var(--R);color:#fff}
+.bGH{background:var(--BG);color:var(--INK2);border:1px solid var(--BR)}
+.bOL{background:transparent;color:var(--G);border:2px solid var(--G)}
+.inp{width:100%;background:var(--BG);border:1.5px solid var(--BR);border-radius:10px;padding:13px 14px;font-size:14px;color:var(--INK);font-family:var(--F);outline:none;transition:border .2s}
+.inp:focus{border-color:var(--G);background:var(--W)}
+.inp::placeholder{color:var(--INK4)}
+.lbl{font-size:11px;font-weight:700;color:var(--INK3);display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.05em}
+.card{background:var(--W);border-radius:14px;padding:15px;box-shadow:var(--SH)}
+.bdg{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700}
+.bdg-G{background:var(--GB);color:var(--GD)}
+.bdg-O{background:var(--OB);color:var(--OD)}
+.bdg-R{background:var(--RB);color:#B91C1C}
+.bdg-B{background:var(--BB);color:var(--BD)}
+.bdg-Y{background:var(--YB);color:#78350F}
+.spinner{width:17px;height:17px;border:2.5px solid rgba(255,255,255,.25);border-top-color:#fff;border-radius:50%;animation:spin .65s linear infinite}
+.divrow{display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid var(--BR)}
+.divrow:last-child{border-bottom:none}
+.sec{font-size:11px;font-weight:700;color:var(--INK4);text-transform:uppercase;letter-spacing:.1em;padding:13px 18px 8px}
+/* ───── SPLASH ───── */
+#s-splash{background:linear-gradient(155deg,#003D27 0%,#007A4D 50%,#00B574 100%);align-items:center;justify-content:center;text-align:center}
+/* ───── HOME ───── */
+.home-hero{background:linear-gradient(155deg,#003D27,#007A4D);padding:52px 22px 22px}
+.pc{margin:10px 16px;border-radius:18px;cursor:pointer;overflow:hidden;position:relative;transition:transform .17s;animation:popIn .4s both}
+.pc:active{transform:scale(.97)}
+.pc-in{padding:18px;display:flex;align-items:center;gap:14px;position:relative;z-index:1}
+.pc-shine{position:absolute;top:-30px;right:-30px;width:110px;height:110px;border-radius:50%;background:rgba(255,255,255,.08)}
+.pc-G{background:linear-gradient(135deg,#003D27,#007A4D,#00B574)}
+.pc-O{background:linear-gradient(135deg,#7C1D06,#C84A13,#FF6020);animation-delay:.06s}
+.pc-B{background:linear-gradient(135deg,#1E3A8A,#1D4ED8,#3B82F6);animation-delay:.12s}
+.pc-ico{width:50px;height:50px;background:rgba(255,255,255,.18);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
+.pc-arr{width:30px;height:30px;background:rgba(255,255,255,.15);border-radius:50%;display:flex;align-items:center;justify-content:center;margin-left:auto;flex-shrink:0}
+/* ───── PASSAGER ───── */
+.map-z{height:265px;position:relative;overflow:hidden;flex-shrink:0}
+.map-cv{width:100%;height:100%;display:block}
+.map-top{position:absolute;top:11px;left:11px;right:11px;display:flex;gap:8px;z-index:5}
+.map-s{flex:1;background:var(--W);border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:9px;box-shadow:var(--SHL);cursor:pointer;font-size:13px;color:var(--INK4);font-weight:600;transition:transform .15s}
+.map-s:active{transform:scale(.98)}
+.map-gps{width:42px;height:42px;background:var(--W);border-radius:12px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:var(--SHL);flex-shrink:0;transition:transform .15s}
+.map-gps:active{transform:scale(.9)}
+.eta-ch{position:absolute;bottom:10px;left:11px;right:58px;background:rgba(15,17,23,.92);backdrop-filter:blur(10px);border-radius:11px;padding:8px 13px;display:none;border:1px solid rgba(0,181,116,.25)}
+.eta-ch.ON{display:flex;align-items:center;justify-content:space-between}
+.nearbus{margin:11px 14px;background:var(--W);border-radius:14px;padding:13px 15px;display:flex;align-items:center;gap:12px;box-shadow:var(--SH);cursor:pointer;transition:transform .15s}
+.nearbus:active{transform:scale(.98)}
+.lcard{margin:0 14px 9px;background:var(--W);border-radius:14px;padding:14px 15px;box-shadow:var(--SH);cursor:pointer;transition:transform .15s}
+.lcard:active{transform:scale(.98)}
+.rt{display:flex;align-items:center;gap:5px;margin-top:9px}
+.rdot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.rln{flex:1;height:1.5px;opacity:.3}
+/* PASS */
+.chip{border-radius:12px;padding:13px 15px;display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.chip-A{background:linear-gradient(135deg,#ECFDF5,#D1FAE5);border:1.5px solid #6EE7B7}
+.chip-X{background:linear-gradient(135deg,#FEF2F2,#FEE2E2);border:1.5px solid #FCA5A5}
+.chip-N{background:var(--BG);border:1.5px solid var(--BR)}
+.chip-ico{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.qr-wrap{display:flex;flex-direction:column;align-items:center;padding:22px 0}
+.qr-fr{background:var(--W);padding:14px;border-radius:16px;box-shadow:var(--SHL);margin-bottom:11px;border:2px solid var(--BG2)}
+/* ───── CHAUFFEUR ───── */
+.drv-hero{background:linear-gradient(135deg,#7C1D06,#C84A13,#FF6020);padding:52px 22px 20px}
+.drv-bdg{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.18);padding:5px 12px;border-radius:20px;font-size:11px;font-weight:700;color:#fff;margin-bottom:9px}
+.dot-live{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.9);animation:pulse 1.8s infinite}
+.batt-bar{height:9px;background:rgba(255,255,255,.2);border-radius:5px;overflow:hidden;margin-top:9px}
+.batt-fill{height:100%;border-radius:5px;transition:width 1s}
+.stat3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0 14px 10px}
+.sbox{background:var(--W);border-radius:14px;padding:13px 9px;text-align:center;box-shadow:var(--SH)}
+.sv{font-size:24px;font-weight:800;letter-spacing:-1px}
+.sl{font-size:10px;font-weight:600;color:var(--INK4);margin-top:2px;text-transform:uppercase;letter-spacing:.05em}
+.cap-bar{height:10px;background:rgba(0,0,0,.06);border-radius:5px;overflow:hidden;margin-top:9px}
+.scan-fab{width:64px;height:64px;background:var(--O);border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 22px rgba(255,96,32,.45);transition:transform .18s;font-size:28px}
+.scan-fab:active{transform:scale(.9)}
+/* SCANNER */
+#s-D-scan{background:#000}
+.scan-area{flex:1;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.scan-bg{position:absolute;inset:0;width:100%;height:100%}
+.scan-frame{width:220px;height:220px;position:relative}
+.sc{position:absolute;width:26px;height:26px}
+.sc.tl{top:0;left:0;border-top:4px solid var(--G);border-left:4px solid var(--G);border-radius:5px 0 0 0}
+.sc.tr{top:0;right:0;border-top:4px solid var(--G);border-right:4px solid var(--G);border-radius:0 5px 0 0}
+.sc.bl{bottom:0;left:0;border-bottom:4px solid var(--G);border-left:4px solid var(--G);border-radius:0 0 0 5px}
+.sc.br{bottom:0;right:0;border-bottom:4px solid var(--G);border-right:4px solid var(--G);border-radius:0 0 5px 0}
+.scan-ln{position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--G),transparent);animation:scanLine 2s ease-in-out infinite}
+.scan-res{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;padding:28px}
+.scan-manual{position:absolute;bottom:88px;left:14px;right:14px}
+/* PERFS */
+.circ-wrap{display:flex;flex-direction:column;align-items:center;margin:14px 0 16px;position:relative}
+.circ-txt{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center}
+.crit-list{margin:0 14px 10px;background:var(--W);border-radius:14px;overflow:hidden;box-shadow:var(--SH)}
+.crit{padding:12px 15px;border-bottom:1px solid var(--BR)}
+.crit:last-child{border-bottom:none}
+.crit-bar{height:5px;background:var(--BG);border-radius:3px;overflow:hidden;margin-top:5px}
+.crit-fill{height:100%;border-radius:3px}
+/* WALLET */
+.wallet-hero{background:linear-gradient(135deg,#7C1D06,#C84A13,#FF6020);padding:52px 22px 24px}
+.wgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:11px 14px}
+.wbox{background:var(--W);border-radius:14px;padding:13px;box-shadow:var(--SH)}
+.wb-l{font-size:10px;font-weight:700;color:var(--INK4);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px}
+.wb-v{font-size:19px;font-weight:800;color:var(--INK)}
+.txitem{background:var(--W);border-radius:14px;padding:12px 14px;display:flex;align-items:center;gap:11px;box-shadow:var(--SH)}
+/* ───── ADMIN ───── */
+.admin-hero{background:linear-gradient(155deg,#1E3A8A,#1D4ED8);padding:52px 22px 20px}
+.kgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:11px 14px}
+.kcard{background:var(--W);border-radius:14px;padding:15px;box-shadow:var(--SH)}
+.kl{font-size:10px;font-weight:700;color:var(--INK4);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
+.kv{font-size:27px;font-weight:800;letter-spacing:-1px}
+.kt{font-size:11px;color:var(--GD);font-weight:600;margin-top:3px}
+.fmap{margin:0 14px 10px;height:165px;border-radius:14px;overflow:hidden;position:relative;box-shadow:var(--SH);background:linear-gradient(135deg,#EFF6FF,#DBEAFE)}
+.fmap-cv{width:100%;height:100%;display:block}
+.fleet-item{background:var(--W);border-radius:14px;padding:12px 14px;display:flex;align-items:center;gap:11px;box-shadow:var(--SH)}
+.fi-code{font-size:12px;font-weight:800;color:#1D4ED8;font-family:var(--FM);min-width:42px}
+.fi-bar{height:4px;background:var(--BG2);border-radius:2px;overflow:hidden;margin-top:4px}
+.bchart{display:flex;align-items:flex-end;gap:7px;height:72px}
+.bc{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;height:100%;justify-content:flex-end}
+.bcf{width:100%;border-radius:4px 4px 0 0;min-height:4px;cursor:pointer}
+.bcl{font-size:9px;color:var(--INK4)}
+.mgmt-card{background:var(--W);border-radius:14px;overflow:hidden;box-shadow:var(--SH)}
+.mgmt-item{display:flex;align-items:center;gap:12px;padding:13px 15px;border-bottom:1px solid var(--BR)}
+.mgmt-item:last-child{border-bottom:none}
+.mava{width:38px;height:38px;border-radius:50%;background:var(--GB);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--GD);flex-shrink:0}
+.inccard{background:var(--W);border-radius:14px;padding:13px 15px;display:flex;align-items:flex-start;gap:12px;box-shadow:var(--SH);border-left:4px solid transparent}
+.inccard.ouvert{border-left-color:var(--R)}
+.inccard.en_cours{border-left-color:var(--Y)}
+.inccard.resolu{border-left-color:var(--G)}
+/* ───── MODAL CONTENT ───── */
+.popt-g{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:15px}
+.popt{background:var(--BG);border:2px solid transparent;border-radius:12px;padding:13px 7px;text-align:center;cursor:pointer;transition:all .18s}
+.popt.ON{border-color:var(--G);background:var(--GB)}
+.popt:active{transform:scale(.94)}
+.popt-ico{font-size:24px;margin-bottom:5px}
+.popt-n{font-size:10px;font-weight:700;color:var(--INK3);text-transform:uppercase;letter-spacing:.05em}
+.popt-p{font-size:17px;font-weight:800;color:var(--INK)}
+.mm-row{display:flex;gap:9px;margin-bottom:15px}
+.mmopt{flex:1;padding:13px 7px;border:2px solid var(--BR);border-radius:12px;text-align:center;cursor:pointer;background:var(--BG);transition:all .18s}
+.mmopt.ON{border-color:var(--G);background:var(--GB)}
+.mmopt:active{transform:scale(.94)}
+.wro{display:flex;align-items:center;gap:13px;padding:14px;border-radius:12px;background:var(--BG);cursor:pointer;border:2px solid transparent;transition:all .18s;margin-bottom:9px}
+.wro.ON{border-color:var(--O);background:var(--OB)}
+.wro:active{transform:scale(.97)}
+.amtb{flex:1;padding:11px 4px;background:var(--BG);border:1.5px solid var(--BR);border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--F);color:var(--INK3);text-align:center;transition:all .15s}
+.amtb.ON{border-color:var(--O);color:var(--O);background:var(--OB)}
+.amtb:active{transform:scale(.94)}
+.inc-type-g{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:15px}
+.incb{padding:16px 8px;background:var(--BG);border:1.5px solid var(--BR);border-radius:12px;text-align:center;cursor:pointer;font-family:var(--F);font-size:13px;font-weight:600;color:var(--INK2);transition:all .15s}
+.incb:active{transform:scale(.94);background:var(--RB);border-color:var(--R);color:var(--R)}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- ═══ SPLASH ═══ -->
+<div id="s-splash" class="P ON">
+  <div style="display:flex;flex-direction:column;align-items:center;text-align:center;padding:0 20px;">
+    <div style="width:88px;height:88px;background:rgba(255,255,255,.18);border-radius:26px;display:flex;align-items:center;justify-content:center;margin-bottom:20px;border:2px solid rgba(255,255,255,.22);animation:popIn .6s .3s both">
+      <svg width="44" height="44" viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="22" fill="rgba(255,255,255,.25)" stroke="white" stroke-width="2"/><path d="M14 24l8 8L34 16" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <div style="font-size:32px;font-weight:800;color:#fff;letter-spacing:-1px;animation:popIn .5s .5s both">ON-GO Africa</div>
+    <div style="font-size:14px;color:rgba(255,255,255,.7);margin-top:7px;animation:popIn .5s .6s both">Transport Artisanal Numérisé · Abidjan</div>
+    <div style="width:100px;height:3px;background:rgba(255,255,255,.2);border-radius:2px;margin-top:32px;overflow:hidden;animation:popIn .4s .7s both">
+      <div style="height:100%;background:rgba(255,255,255,.9);animation:loadBar 2.2s .8s ease forwards"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ HOME ═══ -->
+<div id="s-home" class="P">
+  <div class="SB">
+    <div class="home-hero">
+      <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.14em;margin-bottom:7px">Abidjan · Côte d'Ivoire</div>
+      <div style="font-size:27px;font-weight:800;color:#fff;letter-spacing:-.5px;line-height:1.2">Bienvenue sur<br>ON-GO Africa</div>
+      <div style="font-size:13px;color:rgba(255,255,255,.7);margin-top:8px;line-height:1.65">Gbaka & Woroworo électriques.<br>Simple. Rapide. Traçable.</div>
+    </div>
+    <div style="padding:14px 0 0">
+      <div class="pc pc-G" id="pc-P">
+        <div class="pc-shine"></div>
+        <div class="pc-in">
+          <div class="pc-ico">🎫</div>
+          <div><div style="font-size:17px;font-weight:800;color:#fff">Je suis Passager</div><div style="font-size:12px;color:rgba(255,255,255,.65);margin-top:3px;line-height:1.5">Pass Mobile Money · QR Code · Suivi bus</div></div>
+          <div class="pc-arr"><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="3"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+        </div>
+      </div>
+      <div class="pc pc-O" id="pc-D">
+        <div class="pc-shine"></div>
+        <div class="pc-in">
+          <div class="pc-ico">🚌</div>
+          <div><div style="font-size:17px;font-weight:800;color:#fff">Je suis Chauffeur</div><div style="font-size:12px;color:rgba(255,255,255,.65);margin-top:3px;line-height:1.5">Scanner QR · Salaire · Performances</div></div>
+          <div class="pc-arr"><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="3"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+        </div>
+      </div>
+      <div class="pc pc-B" id="pc-A">
+        <div class="pc-shine"></div>
+        <div class="pc-in">
+          <div class="pc-ico">📊</div>
+          <div><div style="font-size:17px;font-weight:800;color:#fff">Administration</div><div style="font-size:12px;color:rgba(255,255,255,.65);margin-top:3px;line-height:1.5">Flotte · Finances · Chauffeurs · Incidents</div></div>
+          <div class="pc-arr"><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="3"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+        </div>
+      </div>
+    </div>
+    <div style="margin:10px 16px 20px;background:rgba(0,181,116,.08);border:1.5px dashed rgba(0,181,116,.3);border-radius:12px;padding:13px 14px">
+      <div style="font-size:11px;font-weight:700;color:var(--GD);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">📋 Codes de test — Pilote ON-GO</div>
+      <div style="font-size:12px;color:var(--INK3);line-height:1.8">
+        <b>Passager :</b> +225 07 01 00 00 01 · OTP : <b>0000</b><br>
+        <b>Chauffeur :</b> +225 07 00 00 00 01 · PIN : <b>1234</b><br>
+        <b>QR valides :</b> ONGO-2026-JEAN-0001 · ONGO-2026-AMIN-0004<br>
+        <b>QR expiré :</b> ONGO-2026-IBRA-0003
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ LOGIN ═══ -->
+<div id="s-login" class="P">
+  <div id="L-hd" style="background:linear-gradient(155deg,#003D27,#007A4D);padding:52px 22px 22px">
+    <div id="L-ico" style="width:52px;height:52px;background:rgba(255,255,255,.15);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:26px;margin-bottom:14px">📱</div>
+    <div id="L-tit" style="font-size:22px;font-weight:800;color:#fff;margin-bottom:4px">Connexion</div>
+    <div id="L-sub" style="font-size:13px;color:rgba(255,255,255,.65)">Entrez votre numéro</div>
+  </div>
+  <div class="SB" style="padding:16px 18px 20px">
+    <!-- DEMO ACCESS -->
+    <div style="background:rgba(0,181,116,.08);border:1.5px dashed rgba(0,181,116,.3);border-radius:11px;padding:12px 14px;margin-bottom:16px">
+      <div style="font-size:11px;font-weight:700;color:var(--GD);text-transform:uppercase;letter-spacing:.06em;margin-bottom:9px">⚡ Accès démo instantané</div>
+      <div style="display:flex;gap:7px">
+        <button id="dP" style="flex:1;padding:10px 4px;background:var(--W);border:1px solid var(--BR);border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--F);color:var(--INK2);transition:all .15s">🎫 Passager</button>
+        <button id="dD" style="flex:1;padding:10px 4px;background:var(--W);border:1px solid var(--BR);border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--F);color:var(--INK2);transition:all .15s">🚌 Chauffeur</button>
+        <button id="dA" style="flex:1;padding:10px 4px;background:var(--W);border:1px solid var(--BR);border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--F);color:var(--INK2);transition:all .15s">📊 Admin</button>
+      </div>
+    </div>
+    <!-- TEL -->
+    <div id="step-tel">
+      <div class="lbl">Numéro de téléphone</div>
+      <div style="display:flex;gap:9px;margin-bottom:14px">
+        <select id="ph-cc" style="background:var(--BG);border:1.5px solid var(--BR);border-radius:10px;padding:13px 11px;font-size:14px;color:var(--INK);font-family:var(--F);outline:none;min-width:85px;cursor:pointer">
+          <option value="+225">🇨🇮 +225</option>
+          <option value="+223">🇲🇱 +223</option>
+          <option value="+226">🇧🇫 +226</option>
+          <option value="+221">🇸🇳 +221</option>
+          <option value="+233">🇬🇭 +233</option>
+        </select>
+        <input class="inp" id="ph-n" type="tel" placeholder="07 00 00 00 00" style="flex:1">
+      </div>
+      <button class="btn bG" id="btn-sendotp">📲 Recevoir le code SMS</button>
+      <button class="btn bGH" style="margin-top:9px" onclick="G('s-home')">← Retour</button>
+    </div>
+    <!-- OTP -->
+    <div id="step-otp" style="display:none">
+      <div style="font-size:14px;font-weight:600;color:var(--INK2);margin-bottom:4px">Code envoyé au</div>
+      <div id="otp-ph" style="font-size:17px;font-weight:800;color:var(--INK);font-family:var(--FM);margin-bottom:18px">+225 07 XX XX XX</div>
+      <div style="display:flex;gap:11px;justify-content:center;margin:0 0 18px">
+        <input id="o0" style="width:56px;height:63px;background:var(--BG);border:2px solid var(--BR);border-radius:12px;text-align:center;font-size:24px;font-weight:700;color:var(--INK);font-family:var(--FM);outline:none" type="tel" maxlength="1">
+        <input id="o1" style="width:56px;height:63px;background:var(--BG);border:2px solid var(--BR);border-radius:12px;text-align:center;font-size:24px;font-weight:700;color:var(--INK);font-family:var(--FM);outline:none" type="tel" maxlength="1">
+        <input id="o2" style="width:56px;height:63px;background:var(--BG);border:2px solid var(--BR);border-radius:12px;text-align:center;font-size:24px;font-weight:700;color:var(--INK);font-family:var(--FM);outline:none" type="tel" maxlength="1">
+        <input id="o3" style="width:56px;height:63px;background:var(--BG);border:2px solid var(--BR);border-radius:12px;text-align:center;font-size:24px;font-weight:700;color:var(--INK);font-family:var(--FM);outline:none" type="tel" maxlength="1">
+      </div>
+      <button class="btn bG" id="btn-verify">✓ Confirmer le code</button>
+      <button class="btn bGH" style="margin-top:9px" id="btn-resend">Renvoyer le code</button>
+      <button class="btn bGH" style="margin-top:8px" onclick="resetLogin()">← Modifier le numéro</button>
+    </div>
+    <!-- PIN -->
+    <div id="step-pin" style="display:none">
+      <div style="font-size:15px;font-weight:600;color:var(--INK2);margin-bottom:18px">Code PIN (4 chiffres)</div>
+      <div style="display:flex;gap:11px;justify-content:center;margin:0 0 18px">
+        <input id="p0" style="width:56px;height:63px;background:var(--BG);border:2px solid var(--BR);border-radius:12px;text-align:center;font-size:24px;font-weight:700;color:var(--INK);font-family:var(--FM);outline:none" type="tel" maxlength="1">
+        <input id="p1" style="width:56px;height:63px;background:var(--BG);border:2px solid var(--BR);border-radius:12px;text-align:center;font-size:24px;font-weight:700;color:var(--INK);font-family:var(--FM);outline:none" type="tel" maxlength="1">
+        <input id="p2" style="width:56px;height:63px;background:var(--BG);border:2px solid var(--BR);border-radius:12px;text-align:center;font-size:24px;font-weight:700;color:var(--INK);font-family:var(--FM);outline:none" type="tel" maxlength="1">
+        <input id="p3" style="width:56px;height:63px;background:var(--BG);border:2px solid var(--BR);border-radius:12px;text-align:center;font-size:24px;font-weight:700;color:var(--INK);font-family:var(--FM);outline:none" type="tel" maxlength="1">
+      </div>
+      <button class="btn bO" id="btn-pin">✓ Confirmer le PIN</button>
+      <button class="btn bGH" style="margin-top:9px" onclick="resetLogin()">← Retour</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ PASSAGER — ACCUEIL ═══ -->
+<div id="s-P-home" class="P">
+  <div style="padding:8px 18px 0;flex-shrink:0;display:flex;justify-content:space-between;align-items:center;background:var(--BG)"><span id="clk" style="font-size:15px;font-weight:700;color:var(--INK)">9:41</span><span style="font-size:10px;font-weight:700;color:var(--G)">ON-GO</span></div>
+  <div class="SB">
+    <div class="map-z">
+      <canvas class="map-cv" id="cv-map"></canvas>
+      <div class="map-top">
+        <div class="map-s" id="btn-search"><svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="var(--INK4)" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>Où allez-vous ?</div>
+        <button class="map-gps" id="btn-gps"><svg width="17" height="17" fill="none" viewBox="0 0 24 24" stroke="var(--G)" stroke-width="2.5"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M1 12h4M19 12h4"/></svg></button>
+      </div>
+      <div class="eta-ch" id="eta-ch">
+        <div><div style="font-size:9px;color:rgba(255,255,255,.5)">Prochain bus</div><div id="eta-bus" style="font-size:12px;font-weight:700;color:#4DFFB0">—</div></div>
+        <div style="text-align:right"><div style="font-size:9px;color:rgba(255,255,255,.5)">Arrivée</div><div id="eta-min" style="font-size:13px;font-weight:800;color:#fff">—</div></div>
+      </div>
+    </div>
+    <div class="nearbus" id="btn-nearbus">
+      <div style="width:42px;height:42px;background:var(--GB);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0">🚌</div>
+      <div style="flex:1"><div id="near-t" style="font-size:13px;font-weight:700;color:var(--INK)">EV-02 · Treichville → Bassam</div><div id="near-s" style="font-size:12px;color:var(--INK3);margin-top:2px">3 min · 8 places · Batterie 72%</div></div>
+      <svg width="17" height="17" fill="none" viewBox="0 0 24 24" stroke="var(--INK4)" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+    </div>
+    <div class="sec">Lignes disponibles</div>
+    <div class="lcard" id="btn-ligne1">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
+        <div style="font-size:14px;font-weight:700;color:var(--INK)">Corridor Treichville – Bassam</div>
+        <span class="bdg bdg-G"><span style="width:5px;height:5px;border-radius:50%;background:var(--G);animation:pulse 2s infinite;display:inline-block"></span>En service</span>
+      </div>
+      <div style="font-size:12px;color:var(--INK3)">Toutes les 15 min · 05h30–21h00</div>
+      <div class="rt"><div class="rdot" style="background:var(--G)"></div><div class="rln" style="background:var(--G)"></div><span style="font-size:11px;color:var(--INK4)">Anani</span><div class="rln" style="background:var(--G)"></div><span style="font-size:11px;color:var(--INK4)">Moossou</span><div class="rln" style="background:var(--G)"></div><div class="rdot" style="background:var(--O)"></div></div>
+      <div style="display:flex;justify-content:space-between;margin-top:4px"><span style="font-size:11px;color:var(--INK4)">Treichville</span><span style="font-size:11px;color:var(--INK4)">Grand-Bassam</span></div>
+    </div>
+    <div class="lcard" style="opacity:.45;cursor:default">
+      <div style="display:flex;align-items:center;justify-content:space-between"><span style="font-size:14px;font-weight:700;color:var(--INK)">Cocody – Plateau</span><span class="bdg bdg-Y">Bientôt</span></div>
+      <div style="font-size:12px;color:var(--INK3);margin-top:4px">Ouverture prévue — Juillet 2026</div>
+    </div>
+    <div style="height:80px"></div>
+  </div>
+  <div class="NAV" style="--AC:var(--G);--AB:var(--GB)">
+    <button class="NT ON" data-s="s-P-home" onclick="pNav(this)"><div class="NI">🏠</div><span class="NL">Accueil</span></button>
+    <button class="NT" data-s="s-P-pass" onclick="pNav(this)"><div class="NI">🎫</div><span class="NL">Mon Pass</span></button>
+    <button class="NT" data-s="s-P-hist" onclick="pNav(this)"><div class="NI">📋</div><span class="NL">Historique</span></button>
+    <button class="NT" data-s="s-P-profil" onclick="pNav(this)"><div class="NI">👤</div><span class="NL">Profil</span></button>
+  </div>
+</div>
+
+<!-- ═══ PASSAGER — MON PASS ═══ -->
+<div id="s-P-pass" class="P">
+  <div style="padding:8px 18px 10px;flex-shrink:0;background:var(--BG)">
+    <div style="font-size:22px;font-weight:800;color:var(--INK)">Mon Pass</div>
+    <div style="font-size:13px;color:var(--INK3);margin-top:2px">Titre de transport ON-GO Africa</div>
+  </div>
+  <div class="SB" style="padding-bottom:80px">
+    <div class="card" style="margin:0 14px 10px">
+      <div id="pass-chip" class="chip chip-N">
+        <div id="chip-ico" class="chip-ico">🎫</div>
+        <div><div id="chip-tit" style="font-size:16px;font-weight:800;color:var(--INK)">Chargement…</div><div id="chip-sub" style="font-size:12px;color:var(--INK3);margin-top:2px">—</div></div>
+      </div>
+      <div id="qr-zone">
+        <div class="qr-wrap"><div class="qr-fr"><canvas id="qr-cv" width="185" height="185"></canvas></div><div id="qr-txt" style="font-size:10px;color:var(--INK4);font-family:var(--FM)">—</div></div>
+      </div>
+      <div id="nopass-zone" style="display:none;text-align:center;padding:24px 0">
+        <div style="font-size:44px;margin-bottom:11px">🎫</div>
+        <div style="font-size:17px;font-weight:700;color:var(--INK);margin-bottom:7px">Aucun pass actif</div>
+        <div style="font-size:13px;color:var(--INK3);line-height:1.65">Achetez votre pass pour accéder au réseau ON-GO Africa</div>
+      </div>
+      <button class="btn bOL" id="btn-renew" style="margin-top:14px">🎫 Renouveler / Acheter un pass</button>
+    </div>
+  </div>
+  <div class="NAV" style="--AC:var(--G);--AB:var(--GB)">
+    <button class="NT" data-s="s-P-home" onclick="pNav(this)"><div class="NI">🏠</div><span class="NL">Accueil</span></button>
+    <button class="NT ON" data-s="s-P-pass" onclick="pNav(this)"><div class="NI">🎫</div><span class="NL">Mon Pass</span></button>
+    <button class="NT" data-s="s-P-hist" onclick="pNav(this)"><div class="NI">📋</div><span class="NL">Historique</span></button>
+    <button class="NT" data-s="s-P-profil" onclick="pNav(this)"><div class="NI">👤</div><span class="NL">Profil</span></button>
+  </div>
+</div>
+
+<!-- ═══ PASSAGER — HISTORIQUE ═══ -->
+<div id="s-P-hist" class="P">
+  <div style="padding:8px 18px 10px;flex-shrink:0;background:var(--BG)"><div style="font-size:22px;font-weight:800;color:var(--INK)">Historique</div></div>
+  <div class="SB" style="padding-bottom:80px">
+    <div style="display:flex;gap:3px;padding:14px 14px 0">
+      <button class="btn bG" id="ht-trips" onclick="histTab('trips')" style="font-size:13px;padding:10px 14px;width:auto">Mes Trajets</button>
+      <button class="btn bGH" id="ht-purch" onclick="histTab('purch')" style="font-size:13px;padding:10px 14px;width:auto">Mes Achats</button>
+    </div>
+    <div style="padding:11px 14px;display:flex;flex-direction:column;gap:8px" id="trips-list"><div style="text-align:center;padding:24px;color:var(--INK4)">Chargement…</div></div>
+    <div style="padding:11px 14px;display:none;flex-direction:column;gap:8px" id="purch-list"><div style="text-align:center;padding:24px;color:var(--INK4)">Chargement…</div></div>
+  </div>
+  <div class="NAV" style="--AC:var(--G);--AB:var(--GB)">
+    <button class="NT" data-s="s-P-home" onclick="pNav(this)"><div class="NI">🏠</div><span class="NL">Accueil</span></button>
+    <button class="NT" data-s="s-P-pass" onclick="pNav(this)"><div class="NI">🎫</div><span class="NL">Mon Pass</span></button>
+    <button class="NT ON" data-s="s-P-hist" onclick="pNav(this)"><div class="NI">📋</div><span class="NL">Historique</span></button>
+    <button class="NT" data-s="s-P-profil" onclick="pNav(this)"><div class="NI">👤</div><span class="NL">Profil</span></button>
+  </div>
+</div>
+
+<!-- ═══ PASSAGER — PROFIL ═══ -->
+<div id="s-P-profil" class="P">
+  <div class="SB" style="padding-bottom:80px">
+    <div style="background:linear-gradient(155deg,#003D27,#007A4D);padding:50px 22px 26px;display:flex;flex-direction:column;align-items:center">
+      <div id="P-ava" style="width:72px;height:72px;border-radius:50%;background:rgba(255,255,255,.22);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;color:#fff;border:3px solid rgba(255,255,255,.25);margin-bottom:11px">K</div>
+      <div id="P-tel" style="font-size:17px;font-weight:700;color:#fff">+225 07 01 00 00 01</div>
+      <div style="font-size:12px;color:rgba(255,255,255,.6);margin-top:3px">Membre depuis Mars 2026</div>
+      <div style="display:flex;gap:20px;margin-top:13px">
+        <div style="text-align:center"><div id="P-trips" style="font-size:19px;font-weight:800;color:#fff">0</div><div style="font-size:11px;color:rgba(255,255,255,.6)">Trajets</div></div>
+        <div style="width:1px;background:rgba(255,255,255,.15)"></div>
+        <div style="text-align:center"><div id="P-ptype" style="font-size:19px;font-weight:800;color:#fff;text-transform:capitalize">—</div><div style="font-size:11px;color:rgba(255,255,255,.6)">Pass actuel</div></div>
+      </div>
+    </div>
+    <div style="margin:13px 14px;background:var(--W);border-radius:14px;overflow:hidden;box-shadow:var(--SH)">
+      <div class="divrow" style="padding:13px 15px;cursor:pointer" id="btn-editpro">
+        <div style="width:34px;height:34px;border-radius:9px;background:var(--GB);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0">👤</div>
+        <div style="flex:1"><div id="P-name" style="font-size:13px;font-weight:600;color:var(--INK)">Kouadio Jean</div><div style="font-size:12px;color:var(--INK4);margin-top:1px">Modifier mes informations</div></div>
+        <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="var(--BG2)" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+      </div>
+      <div class="divrow" style="padding:13px 15px;cursor:pointer" onclick="openM('m-support')">
+        <div style="width:34px;height:34px;border-radius:9px;background:var(--YB);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0">❓</div>
+        <div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--INK)">Aide & Support</div><div style="font-size:12px;color:var(--INK4);margin-top:1px">WhatsApp · 179 · contact@ongo-africa.ci</div></div>
+        <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="var(--BG2)" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+      </div>
+      <div class="divrow" style="padding:13px 15px;cursor:pointer;border-bottom:none" id="btn-logout-P">
+        <div style="width:34px;height:34px;border-radius:9px;background:var(--RB);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0">🚪</div>
+        <div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--R)">Se déconnecter</div></div>
+        <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="var(--R)" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+      </div>
+    </div>
+  </div>
+  <div class="NAV" style="--AC:var(--G);--AB:var(--GB)">
+    <button class="NT" data-s="s-P-home" onclick="pNav(this)"><div class="NI">🏠</div><span class="NL">Accueil</span></button>
+    <button class="NT" data-s="s-P-pass" onclick="pNav(this)"><div class="NI">🎫</div><span class="NL">Mon Pass</span></button>
+    <button class="NT" data-s="s-P-hist" onclick="pNav(this)"><div class="NI">📋</div><span class="NL">Historique</span></button>
+    <button class="NT ON" data-s="s-P-profil" onclick="pNav(this)"><div class="NI">👤</div><span class="NL">Profil</span></button>
+  </div>
+</div>
+
+<!-- ═══ CHAUFFEUR — ACCUEIL ═══ -->
+<div id="s-D-home" class="P">
+  <div class="SB" style="padding-bottom:80px">
+    <div class="drv-hero">
+      <div class="drv-bdg"><span class="dot-live"></span><span id="D-status">En service</span></div>
+      <div id="D-name" style="font-size:21px;font-weight:800;color:#fff">Koné Issiaka</div>
+      <div id="D-veh" style="font-size:12px;color:rgba(255,255,255,.7);margin-top:3px">EV-01 · Ligne Treichville–Bassam</div>
+    </div>
+    <!-- Batterie -->
+    <div style="margin:11px 14px" class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px">
+        <div><div style="font-size:10px;font-weight:700;color:var(--INK4);text-transform:uppercase;letter-spacing:.05em">Batterie</div><div id="D-bat" style="font-size:26px;font-weight:800">85%</div></div>
+        <div style="text-align:right"><div style="font-size:10px;font-weight:700;color:var(--INK4);text-transform:uppercase;letter-spacing:.05em">Station proche</div><div id="D-station" style="font-size:13px;font-weight:700;color:var(--B);margin-top:3px">🔌 Treichville · 2.4km</div></div>
+      </div>
+      <div class="batt-bar"><div id="D-batfill" class="batt-fill" style="width:85%;background:linear-gradient(90deg,var(--G),var(--GL))"></div></div>
+    </div>
+    <!-- Stats -->
+    <div class="stat3">
+      <div class="sbox"><div id="D-tot" class="sv" style="color:var(--B)">145</div><div class="sl">🔵 Total</div></div>
+      <div class="sbox"><div id="D-ok" class="sv" style="color:var(--G)">140</div><div class="sl">🟢 Valides</div></div>
+      <div class="sbox"><div id="D-ko" class="sv" style="color:var(--R)">5</div><div class="sl">🔴 Refusés</div></div>
+    </div>
+    <!-- Capacité -->
+    <div style="margin:0 14px 10px" class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <span style="font-size:13px;font-weight:700;color:var(--INK2)">Passagers actuels</span>
+        <span id="D-cap" style="font-size:21px;font-weight:800;color:var(--INK)">18 <span style="font-size:12px;color:var(--INK4);font-weight:400">/ 22</span></span>
+      </div>
+      <div class="cap-bar"><div id="D-capfill" style="height:100%;border-radius:5px;background:linear-gradient(90deg,var(--G),var(--GL));width:81.8%;transition:width 1s"></div></div>
+    </div>
+    <!-- Scanner FAB -->
+    <div style="margin:0 14px 10px;display:flex;flex-direction:column;align-items:center;gap:7px">
+      <button class="scan-fab" id="btn-openscan">📷</button>
+      <span style="font-size:10px;font-weight:700;color:var(--INK4);text-transform:uppercase;letter-spacing:.09em">Scanner un passager</span>
+    </div>
+    <div style="margin:0 14px 9px"><button class="btn" style="background:var(--RB);color:var(--R);border:1.5px solid rgba(239,68,68,.18)" id="btn-incident">⚠️ Signaler un incident</button></div>
+    <div style="margin:0 14px"><button class="btn bGH" id="btn-endsvc">🔴 Terminer ma journée</button></div>
+  </div>
+  <div class="NAV" style="--AC:var(--O);--AB:var(--OB)">
+    <button class="NT ON" data-s="s-D-home" onclick="dNav(this)"><div class="NI">🏠</div><span class="NL">Accueil</span></button>
+    <button class="NT" data-s="s-D-scan" onclick="dNav(this);openScanner()"><div class="NI">📷</div><span class="NL">Scanner</span></button>
+    <button class="NT" data-s="s-D-perf" onclick="dNav(this)"><div class="NI">📈</div><span class="NL">Perfs</span></button>
+    <button class="NT" data-s="s-D-wallet" onclick="dNav(this)"><div class="NI">💰</div><span class="NL">Wallet</span></button>
+  </div>
+</div>
+
+<!-- ═══ SCANNER ═══ -->
+<div id="s-D-scan" class="P">
+  <div class="scan-area">
+    <canvas class="scan-bg" id="cv-scanbg"></canvas>
+    <div id="scan-ui" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">
+      <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.12em;margin-bottom:15px">Scanner QR Code Passager</div>
+      <div class="scan-frame">
+        <div class="sc tl"></div><div class="sc tr"></div><div class="sc bl"></div><div class="sc br"></div>
+        <div class="scan-ln"></div>
+      </div>
+      <div style="font-size:13px;color:rgba(255,255,255,.4);margin-top:15px">Pointez vers le QR Code</div>
+    </div>
+    <div class="scan-res" id="scan-res"></div>
+  </div>
+  <div class="scan-manual">
+    <div style="display:flex;gap:8px">
+      <input class="inp" id="scan-inp" type="text" placeholder="Code QR manuel (ex: ONGO-2026-JEAN-0001)" style="flex:1;background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.1);color:#fff;font-size:12px">
+      <button class="btn bO" style="width:auto;padding:13px 15px" id="btn-scanok">✓</button>
+    </div>
+  </div>
+  <div class="NAV" style="--AC:var(--O);--AB:var(--OB);background:rgba(0,0,0,.7)">
+    <button class="NT" data-s="s-D-home" onclick="dNav(this)"><div class="NI" style="opacity:.4">🏠</div><span class="NL" style="color:rgba(255,255,255,.3)">Accueil</span></button>
+    <button class="NT ON" data-s="s-D-scan"><div class="NI">📷</div><span class="NL" style="color:var(--O)">Scanner</span></button>
+    <button class="NT" data-s="s-D-perf" onclick="dNav(this)"><div class="NI" style="opacity:.4">📈</div><span class="NL" style="color:rgba(255,255,255,.3)">Perfs</span></button>
+    <button class="NT" data-s="s-D-wallet" onclick="dNav(this)"><div class="NI" style="opacity:.4">💰</div><span class="NL" style="color:rgba(255,255,255,.3)">Wallet</span></button>
+  </div>
+</div>
+
+<!-- ═══ PERFORMANCES ═══ -->
+<div id="s-D-perf" class="P">
+  <div style="padding:8px 18px 10px;flex-shrink:0;background:var(--BG)"><div style="font-size:22px;font-weight:800;color:var(--INK)">Performances</div><div style="font-size:13px;color:var(--INK3);margin-top:2px">Bonus hebdomadaire</div></div>
+  <div class="SB" style="padding-bottom:80px">
+    <div style="margin:0 14px 10px" class="card">
+      <div class="circ-wrap">
+        <svg width="150" height="150" viewBox="0 0 150 150">
+          <circle cx="75" cy="75" r="62" fill="none" stroke="var(--BG)" stroke-width="11"/>
+          <circle cx="75" cy="75" r="62" fill="none" stroke="var(--O)" stroke-width="11" stroke-linecap="round" stroke-dasharray="390" id="barc" style="transform:rotate(-90deg);transform-origin:75px 75px;transition:stroke-dashoffset 1.2s" stroke-dashoffset="78"/>
+        </svg>
+        <div class="circ-txt">
+          <div id="bpct" style="font-size:27px;font-weight:800;color:var(--O)">80%</div>
+          <div style="font-size:11px;color:var(--INK4)">du bonus</div>
+        </div>
+      </div>
+      <div style="text-align:center;margin-bottom:4px"><span style="font-size:16px;font-weight:800;color:var(--INK)">Bonus : </span><span id="bamt" style="font-size:16px;font-weight:800;color:var(--O)">10 000 F</span></div>
+      <div id="bhint" style="font-size:12px;color:var(--INK3);text-align:center">Encore une bonne journée pour décrocher votre bonus !</div>
+    </div>
+    <div class="crit-list">
+      <div class="crit"><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span style="font-weight:600;color:var(--INK2)">Scans valides (semaine)</span><span id="crit-s" style="font-weight:700">700/800</span></div><div class="crit-bar"><div id="crit-b1" class="crit-fill" style="background:var(--G);width:87.5%"></div></div></div>
+      <div class="crit"><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span style="font-weight:600;color:var(--INK2)">Régularité horaire</span><span style="font-weight:700">82%</span></div><div class="crit-bar"><div class="crit-fill" style="background:var(--B);width:82%"></div></div></div>
+      <div class="crit"><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span style="font-weight:600;color:var(--INK2)">Taux de refus</span><span id="crit-r" style="font-weight:700">3.4% (bon)</span></div><div class="crit-bar"><div id="crit-b3" class="crit-fill" style="background:var(--GL);width:96%"></div></div></div>
+      <div class="crit" style="border:none"><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span style="font-weight:600;color:var(--INK2)">Conduite éco</span><span style="font-weight:700">75%</span></div><div class="crit-bar"><div class="crit-fill" style="background:var(--Y);width:75%"></div></div></div>
+    </div>
+    <div style="margin:0 14px;background:var(--OB);border-radius:14px;border:1px solid rgba(255,96,32,.15);padding:13px 15px">
+      <div style="font-size:12px;font-weight:700;color:var(--OD);margin-bottom:4px">💡 Conseil du jour</div>
+      <div style="font-size:13px;color:var(--INK2);line-height:1.65">Freinage progressif = batterie préservée = +2 000 F de bonus éco par semaine !</div>
+    </div>
+  </div>
+  <div class="NAV" style="--AC:var(--O);--AB:var(--OB)">
+    <button class="NT" data-s="s-D-home" onclick="dNav(this)"><div class="NI">🏠</div><span class="NL">Accueil</span></button>
+    <button class="NT" data-s="s-D-scan" onclick="dNav(this);openScanner()"><div class="NI">📷</div><span class="NL">Scanner</span></button>
+    <button class="NT ON" data-s="s-D-perf" onclick="dNav(this)"><div class="NI">📈</div><span class="NL">Perfs</span></button>
+    <button class="NT" data-s="s-D-wallet" onclick="dNav(this)"><div class="NI">💰</div><span class="NL">Wallet</span></button>
+  </div>
+</div>
+
+<!-- ═══ WALLET ═══ -->
+<div id="s-D-wallet" class="P">
+  <div class="SB" style="padding-bottom:80px">
+    <div class="wallet-hero">
+      <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px">Solde disponible</div>
+      <div id="W-tot" style="font-size:38px;font-weight:800;color:#fff;letter-spacing:-1.5px">147 500 F</div>
+      <div id="W-break" style="font-size:12px;color:rgba(255,255,255,.65);margin-top:5px">140 000 F salaire + 7 500 F bonus</div>
+    </div>
+    <div class="wgrid">
+      <div class="wbox"><div class="wb-l">Salaire base</div><div id="W-sal" class="wb-v">140 000 F</div><div style="font-size:11px;color:var(--INK4);margin-top:2px">Mois en cours</div></div>
+      <div class="wbox"><div class="wb-l">Bonus cumulés</div><div id="W-bon" class="wb-v" style="color:var(--O)">7 500 F</div><div style="font-size:11px;color:var(--INK4);margin-top:2px">/ 10 000 F objectif</div></div>
+    </div>
+    <div style="margin:0 14px 11px"><button class="btn bO" id="btn-withdraw">💸 Retirer mes fonds</button></div>
+    <div class="sec" style="padding:0 0 8px;margin:0 14px">Historique transactions</div>
+    <div style="margin:0 14px;display:flex;flex-direction:column;gap:8px" id="tx-list">
+      <div class="txitem"><div style="width:38px;height:38px;border-radius:11px;background:var(--GB);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">💰</div><div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--INK)">Salaire Mars 2026</div><div style="font-size:11px;color:var(--INK4);margin-top:1px">01 mars 2026 · Wave</div></div><div style="font-size:13px;font-weight:700;color:var(--GD)">+140 000 F</div></div>
+      <div class="txitem"><div style="width:38px;height:38px;border-radius:11px;background:var(--OB);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">⭐</div><div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--INK)">Bonus semaine 12</div><div style="font-size:11px;color:var(--INK4);margin-top:1px">24 mars 2026 · Automatique</div></div><div style="font-size:13px;font-weight:700;color:var(--GD)">+7 500 F</div></div>
+      <div class="txitem"><div style="width:38px;height:38px;border-radius:11px;background:var(--RB);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">📤</div><div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--INK)">Retrait · Wave</div><div style="font-size:11px;color:var(--INK4);margin-top:1px">15 mars 2026</div></div><div style="font-size:13px;font-weight:700;color:var(--R)">-50 000 F</div></div>
+    </div>
+    <div style="margin:13px 14px 0"><button class="btn bGH" id="btn-endsvc2" style="border-color:rgba(239,68,68,.2);color:var(--R)">🔴 Terminer ma journée</button></div>
+  </div>
+  <div class="NAV" style="--AC:var(--O);--AB:var(--OB)">
+    <button class="NT" data-s="s-D-home" onclick="dNav(this)"><div class="NI">🏠</div><span class="NL">Accueil</span></button>
+    <button class="NT" data-s="s-D-scan" onclick="dNav(this);openScanner()"><div class="NI">📷</div><span class="NL">Scanner</span></button>
+    <button class="NT" data-s="s-D-perf" onclick="dNav(this)"><div class="NI">📈</div><span class="NL">Perfs</span></button>
+    <button class="NT ON" data-s="s-D-wallet" onclick="dNav(this)"><div class="NI">💰</div><span class="NL">Wallet</span></button>
+  </div>
+</div>
+
+<!-- ═══ ADMIN DASHBOARD ═══ -->
+<div id="s-A-dash" class="P">
+  <div class="SB" style="padding-bottom:80px">
+    <div class="admin-hero">
+      <div id="admin-date" style="font-size:11px;font-weight:700;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:.09em;margin-bottom:7px">VENDREDI 27 MARS 2026</div>
+      <div style="font-size:23px;font-weight:800;color:#fff">Tableau de bord</div>
+      <div style="font-size:13px;color:rgba(255,255,255,.65);margin-top:3px">Supervision flotte · ON-GO Africa</div>
+    </div>
+    <div class="kgrid">
+      <div class="kcard"><div class="kl">Recettes aujourd'hui</div><div id="kpi-rev" class="kv" style="color:var(--G)">425 000 F</div><div id="kpi-rev-t" class="kt">↑ Données démo</div></div>
+      <div class="kcard"><div class="kl">Scans validés</div><div id="kpi-scans" class="kv" style="color:var(--B)">390</div><div class="kt">Ce jour</div></div>
+      <div class="kcard"><div class="kl">Bus en service</div><div id="kpi-fleet" class="kv" style="color:var(--O)">3/5</div><div class="kt">2 en charge</div></div>
+      <div class="kcard"><div class="kl">Incidents actifs</div><div id="kpi-inc" class="kv" style="color:var(--R)">0</div><div id="kpi-inc-t" class="kt">✅ Aucun</div></div>
+    </div>
+    <div class="fmap"><canvas class="fmap-cv" id="cv-amap"></canvas><div style="position:absolute;top:9px;left:11px;font-size:11px;font-weight:700;color:#1D4ED8">🗺️ Flotte · <span style="color:var(--G)">●</span> service · <span style="color:var(--Y)">●</span> charge</div></div>
+    <div class="sec">État de la flotte</div>
+    <div style="margin:0 14px;display:flex;flex-direction:column;gap:7px" id="fleet-list"></div>
+  </div>
+  <div class="NAV" style="--AC:var(--B);--AB:var(--BB)">
+    <button class="NT ON" data-s="s-A-dash" onclick="aNav(this)"><div class="NI">📊</div><span class="NL">Dashboard</span></button>
+    <button class="NT" data-s="s-A-fin" onclick="aNav(this)"><div class="NI">💵</div><span class="NL">Finances</span></button>
+    <button class="NT" data-s="s-A-mgmt" onclick="aNav(this)"><div class="NI">⚙️</div><span class="NL">Gestion</span></button>
+    <button class="NT" data-s="s-A-profil" onclick="aNav(this)"><div class="NI">🔐</div><span class="NL">Compte</span></button>
+  </div>
+</div>
+
+<!-- ═══ ADMIN FINANCES ═══ -->
+<div id="s-A-fin" class="P">
+  <div style="padding:8px 18px 10px;flex-shrink:0;background:var(--BG)"><div style="font-size:22px;font-weight:800;color:var(--INK)">Finances</div></div>
+  <div class="SB" style="padding-bottom:80px">
+    <div style="margin:0 14px 10px" class="card">
+      <div style="font-size:10px;font-weight:700;color:var(--INK4);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px">Recettes totales aujourd'hui</div>
+      <div id="fin-rev" style="font-size:32px;font-weight:800;color:var(--INK);letter-spacing:-1px">425 000 F</div>
+      <div style="font-size:12px;color:var(--GD);font-weight:600;margin-top:4px">↑ Données démo pilote</div>
+    </div>
+    <div style="margin:0 14px 10px" class="card">
+      <div style="font-size:11px;font-weight:700;color:var(--INK4);text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px">Recettes 7 derniers jours (×1000 F)</div>
+      <div class="bchart" id="barchart"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:0 14px 10px">
+      <div class="card" style="text-align:center"><div style="font-size:20px;font-weight:800;color:var(--G)">312</div><div style="font-size:11px;color:var(--INK4);margin-top:2px">Pass Mois</div><div style="font-size:12px;font-weight:700;color:var(--INK2);margin-top:2px">4 680 000 F</div></div>
+      <div class="card" style="text-align:center"><div style="font-size:20px;font-weight:800;color:var(--B)">524</div><div style="font-size:11px;color:var(--INK4);margin-top:2px">Pass Sem.</div><div style="font-size:12px;font-weight:700;color:var(--INK2);margin-top:2px">2 620 000 F</div></div>
+      <div class="card" style="text-align:center"><div style="font-size:20px;font-weight:800;color:var(--O)">5 450</div><div style="font-size:11px;color:var(--INK4);margin-top:2px">Pass Jour</div><div style="font-size:12px;font-weight:700;color:var(--INK2);margin-top:2px">5 450 000 F</div></div>
+    </div>
+    <div class="sec">Dernières transactions</div>
+    <div style="margin:0 14px;display:flex;flex-direction:column;gap:8px">
+      <div class="txitem"><div style="width:38px;height:38px;border-radius:11px;background:var(--GB);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">📱</div><div style="flex:1"><div style="font-size:12px;font-weight:600;color:var(--INK)">Achat Pass Mois · Wave</div><div style="font-size:11px;color:var(--INK4)">Il y a 3 min · +225 07 01 00 00 04</div></div><div style="font-size:13px;font-weight:700;color:var(--GD)">+15 000 F</div></div>
+      <div class="txitem"><div style="width:38px;height:38px;border-radius:11px;background:var(--OB);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">📱</div><div style="flex:1"><div style="font-size:12px;font-weight:600;color:var(--INK)">Achat Pass Semaine · Orange</div><div style="font-size:11px;color:var(--INK4)">Il y a 12 min · +225 07 01 00 00 02</div></div><div style="font-size:13px;font-weight:700;color:var(--GD)">+5 000 F</div></div>
+      <div class="txitem"><div style="width:38px;height:38px;border-radius:11px;background:var(--RB);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">💸</div><div style="flex:1"><div style="font-size:12px;font-weight:600;color:var(--INK)">Retrait salaire · Koné Issiaka</div><div style="font-size:11px;color:var(--INK4)">25 mars · Wave</div></div><div style="font-size:13px;font-weight:700;color:var(--R)">-140 000 F</div></div>
+    </div>
+    <div style="height:12px"></div>
+  </div>
+  <div class="NAV" style="--AC:var(--B);--AB:var(--BB)">
+    <button class="NT" data-s="s-A-dash" onclick="aNav(this)"><div class="NI">📊</div><span class="NL">Dashboard</span></button>
+    <button class="NT ON" data-s="s-A-fin" onclick="aNav(this)"><div class="NI">💵</div><span class="NL">Finances</span></button>
+    <button class="NT" data-s="s-A-mgmt" onclick="aNav(this)"><div class="NI">⚙️</div><span class="NL">Gestion</span></button>
+    <button class="NT" data-s="s-A-profil" onclick="aNav(this)"><div class="NI">🔐</div><span class="NL">Compte</span></button>
+  </div>
+</div>
+
+<!-- ═══ ADMIN GESTION ═══ -->
+<div id="s-A-mgmt" class="P">
+  <div style="padding:8px 18px 10px;flex-shrink:0;background:var(--BG)"><div style="font-size:22px;font-weight:800;color:var(--INK)">Gestion</div><div style="font-size:13px;color:var(--INK3);margin-top:2px">Chauffeurs · Flotte · Incidents</div></div>
+  <div class="SB" style="padding-bottom:80px">
+    <div style="margin:0 14px 5px;display:flex;align-items:center;justify-content:space-between"><div class="sec" style="padding:0">⚠️ Incidents actifs</div><button class="btn bGH" id="btn-refinc" style="width:auto;padding:8px 13px;font-size:12px">↻ Actualiser</button></div>
+    <div style="margin:0 14px 13px;display:flex;flex-direction:column;gap:7px" id="inc-list">
+      <div style="text-align:center;padding:14px;background:var(--GB);border-radius:12px;color:var(--GD);font-weight:600">✅ Aucun incident actif</div>
+    </div>
+    <div style="margin:0 14px 5px;display:flex;align-items:center;justify-content:space-between"><div class="sec" style="padding:0">👨‍✈️ Chauffeurs</div><button class="btn bGH" id="btn-adddrv" style="width:auto;padding:8px 13px;font-size:12px;color:var(--GD);border-color:rgba(0,181,116,.2)">+ Ajouter</button></div>
+    <div style="margin:0 14px 13px" class="mgmt-card" id="drv-list">
+      <div class="mgmt-item">
+        <div class="mava">KI</div>
+        <div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--INK)">Koné Issiaka</div><div style="font-size:11px;color:var(--INK4);margin-top:1px">EV-01 · 140 scans · <span style="color:var(--G)">Actif</span></div></div>
+        <button class="btn bGH" style="width:auto;padding:7px 11px;font-size:11px;color:var(--R);border-color:rgba(239,68,68,.2)" onclick="toggleDrv('12911f61-d19a-45d0-bf8d-08900ea6adbb','actif',this)">Suspendre</button>
+      </div>
+      <div class="mgmt-item">
+        <div class="mava">BD</div>
+        <div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--INK)">Bamba Daouda</div><div style="font-size:11px;color:var(--INK4);margin-top:1px">EV-02 · 132 scans · <span style="color:var(--G)">Actif</span></div></div>
+        <button class="btn bGH" style="width:auto;padding:7px 11px;font-size:11px;color:var(--R);border-color:rgba(239,68,68,.2)" onclick="toggleDrv('2c600990-268c-43f5-9302-625bbe1a563a','actif',this)">Suspendre</button>
+      </div>
+      <div class="mgmt-item">
+        <div class="mava">OM</div>
+        <div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--INK)">Ouattara Moussa</div><div style="font-size:11px;color:var(--INK4);margin-top:1px">EV-03 · 118 scans · <span style="color:var(--G)">Actif</span></div></div>
+        <button class="btn bGH" style="width:auto;padding:7px 11px;font-size:11px;color:var(--R);border-color:rgba(239,68,68,.2)" onclick="toggleDrv('727f6852-c959-41ee-9fe5-21a57b5844c1','actif',this)">Suspendre</button>
+      </div>
+    </div>
+    <div class="sec">👥 Passagers inscrits</div>
+    <div style="margin:0 14px" class="mgmt-card">
+      <div class="mgmt-item"><div class="mava" style="background:var(--BB);color:var(--BD)">KJ</div><div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--INK)">Kouadio Jean</div><div style="font-size:11px;color:var(--INK4);margin-top:1px">+225 07 01 00 00 01 · Pass Mois · <span style="color:var(--G)">Actif · 25j</span></div></div></div>
+      <div class="mgmt-item"><div class="mava" style="background:var(--BB);color:var(--BD)">DF</div><div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--INK)">Diabaté Fatou</div><div style="font-size:11px;color:var(--INK4);margin-top:1px">+225 07 01 00 00 02 · Pass Semaine · <span style="color:var(--G)">Actif · 4j</span></div></div></div>
+      <div class="mgmt-item"><div class="mava" style="background:var(--BB);color:var(--BD)">BI</div><div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--INK)">Bah Ibrahim</div><div style="font-size:11px;color:var(--INK4);margin-top:1px">+225 07 01 00 00 03 · <span style="color:var(--R)">Pass expiré</span></div></div></div>
+      <div class="mgmt-item" style="border-bottom:none"><div class="mava" style="background:var(--BB);color:var(--BD)">TA</div><div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--INK)">Touré Aminata</div><div style="font-size:11px;color:var(--INK4);margin-top:1px">+225 07 01 00 00 04 · Pass Mois · <span style="color:var(--G)">Actif · 18j</span></div></div></div>
+    </div>
+    <div class="sec">💰 Tarifs en vigueur</div>
+    <div style="margin:0 14px" class="mgmt-card">
+      <div class="mgmt-item" onclick="T('info','Modification tarifaire — accès CEO requis')"><div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--INK)">Pass Jour</div><div style="font-size:12px;color:var(--INK4)">Treichville ↔ Bassam</div></div><div style="font-size:16px;font-weight:800;color:var(--G)">1 000 F</div></div>
+      <div class="mgmt-item" onclick="T('info','Modification tarifaire — accès CEO requis')"><div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--INK)">Pass Semaine</div><div style="font-size:12px;color:var(--INK4)">Treichville ↔ Bassam</div></div><div style="font-size:16px;font-weight:800;color:var(--B)">5 000 F</div></div>
+      <div class="mgmt-item" style="border-bottom:none" onclick="T('info','Modification tarifaire — accès CEO requis')"><div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--INK)">Pass Mois</div><div style="font-size:12px;color:var(--INK4)">Treichville ↔ Bassam</div></div><div style="font-size:16px;font-weight:800;color:var(--O)">15 000 F</div></div>
+    </div>
+    <div style="height:12px"></div>
+  </div>
+  <div class="NAV" style="--AC:var(--B);--AB:var(--BB)">
+    <button class="NT" data-s="s-A-dash" onclick="aNav(this)"><div class="NI">📊</div><span class="NL">Dashboard</span></button>
+    <button class="NT" data-s="s-A-fin" onclick="aNav(this)"><div class="NI">💵</div><span class="NL">Finances</span></button>
+    <button class="NT ON" data-s="s-A-mgmt" onclick="aNav(this)"><div class="NI">⚙️</div><span class="NL">Gestion</span></button>
+    <button class="NT" data-s="s-A-profil" onclick="aNav(this)"><div class="NI">🔐</div><span class="NL">Compte</span></button>
+  </div>
+</div>
+
+<!-- ═══ ADMIN PROFIL ═══ -->
+<div id="s-A-profil" class="P">
+  <div class="SB" style="padding-bottom:80px">
+    <div style="background:linear-gradient(155deg,#1E3A8A,#1D4ED8);padding:50px 22px 26px;display:flex;flex-direction:column;align-items:center">
+      <div style="width:72px;height:72px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;color:#fff;border:3px solid rgba(255,255,255,.22);margin-bottom:11px">CEO</div>
+      <div style="font-size:17px;font-weight:700;color:#fff">Administrateur ON-GO</div>
+      <div style="font-size:12px;color:rgba(255,255,255,.6);margin-top:4px">Abidjan · Côte d'Ivoire</div>
+    </div>
+    <div style="margin:13px 14px" class="mgmt-card">
+      <div class="mgmt-item" onclick="T('info','Export rapport mensuel — v2')"><div style="width:34px;height:34px;border-radius:9px;background:var(--GB);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0">📊</div><div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--INK)">Exporter les données</div><div style="font-size:12px;color:var(--INK4)">CSV / Excel mensuel</div></div><svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="var(--BG2)" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></div>
+      <div class="mgmt-item" onclick="T('info','Supabase: ksaxjcojpygjxsxkizix')"><div style="width:34px;height:34px;border-radius:9px;background:var(--BB);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0">🗄️</div><div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--INK)">Base de données</div><div style="font-size:12px;color:var(--INK4)">Supabase · 8 tables · en ligne</div></div><svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="var(--BG2)" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></div>
+      <div class="mgmt-item" onclick="openM('m-support')"><div style="width:34px;height:34px;border-radius:9px;background:var(--YB);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0">🛟</div><div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--INK)">Support technique</div><div style="font-size:12px;color:var(--INK4)">contact@ongo-africa.ci</div></div><svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="var(--BG2)" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></div>
+      <div class="mgmt-item" style="border-bottom:none;cursor:pointer" id="btn-logout-A"><div style="width:34px;height:34px;border-radius:9px;background:var(--RB);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0">🚪</div><div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--R)">Se déconnecter</div></div><svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="var(--R)" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></div>
+    </div>
+    <div style="margin:12px 14px;padding:13px 14px;background:var(--BG);border-radius:12px;text-align:center">
+      <div style="font-size:12px;color:var(--INK4)">ON-GO Africa · MVP Pilote v1.0</div>
+      <div style="font-size:12px;color:var(--BG2);margin-top:3px">30 véhicules · Abidjan 2026</div>
+      <div style="font-size:11px;color:var(--INK4);margin-top:6px;padding-top:6px;border-top:1px solid var(--BG2)">⚠️ Connexion Supabase active en dehors de Claude.ai</div>
+    </div>
+  </div>
+  <div class="NAV" style="--AC:var(--B);--AB:var(--BB)">
+    <button class="NT" data-s="s-A-dash" onclick="aNav(this)"><div class="NI">📊</div><span class="NL">Dashboard</span></button>
+    <button class="NT" data-s="s-A-fin" onclick="aNav(this)"><div class="NI">💵</div><span class="NL">Finances</span></button>
+    <button class="NT" data-s="s-A-mgmt" onclick="aNav(this)"><div class="NI">⚙️</div><span class="NL">Gestion</span></button>
+    <button class="NT ON" data-s="s-A-profil" onclick="aNav(this)"><div class="NI">🔐</div><span class="NL">Compte</span></button>
+  </div>
+</div>
+
+<!-- ═══════ MODALS ═══════ -->
+
+<!-- Acheter pass -->
+<div class="MV" id="m-renew">
+  <div class="MS">
+    <div class="MH"></div>
+    <div class="MT">Acheter / Renouveler</div>
+    <div class="MS2">Paiement Mobile Money · Accès immédiat après confirmation</div>
+    <div class="popt-g">
+      <div class="popt" id="PO-J" onclick="selPass('jour')"><div class="popt-ico">🌅</div><div class="popt-n">Jour</div><div class="popt-p">1 000 F</div></div>
+      <div class="popt" id="PO-S" onclick="selPass('semaine')"><div class="popt-ico">📅</div><div class="popt-n">Semaine</div><div class="popt-p">5 000 F</div></div>
+      <div class="popt ON" id="PO-M" onclick="selPass('mois')"><div class="popt-ico">🗓️</div><div class="popt-n">Mois</div><div class="popt-p">15 000 F</div></div>
+    </div>
+    <div class="lbl">Mode de paiement</div>
+    <div class="mm-row">
+      <div class="mmopt ON" id="MM-W" onclick="selMM('wave')"><div style="font-size:20px;margin-bottom:4px">💛</div><div style="font-size:12px;font-weight:700;color:var(--INK2)">Wave</div></div>
+      <div class="mmopt" id="MM-O" onclick="selMM('orange')"><div style="font-size:20px;margin-bottom:4px">🟠</div><div style="font-size:12px;font-weight:700;color:var(--INK2)">Orange</div></div>
+      <div class="mmopt" id="MM-M" onclick="selMM('mtn')"><div style="font-size:20px;margin-bottom:4px">💛</div><div style="font-size:12px;font-weight:700;color:var(--INK2)">MTN</div></div>
+    </div>
+    <button class="btn bG" id="btn-pay">💳 Payer 15 000 F via Wave</button>
+    <button class="btn bGH" style="margin-top:9px" onclick="closeM('m-renew')">Annuler</button>
+  </div>
+</div>
+
+<!-- Retrait -->
+<div class="MV" id="m-withdraw">
+  <div class="MS">
+    <div class="MH"></div>
+    <div class="MT">Retirer mes fonds</div>
+    <div class="MS2">Virement instantané · Moins de 5 min sur votre compte</div>
+    <div class="lbl">Montant</div>
+    <div style="display:flex;gap:7px;margin-bottom:14px">
+      <div class="amtb" onclick="setAmt(this,50000)">50 000 F</div>
+      <div class="amtb" onclick="setAmt(this,100000)">100 000 F</div>
+      <div class="amtb ON" id="amtall" onclick="setAmtAll(this)">Tout retirer</div>
+    </div>
+    <input class="inp" id="amt-custom" type="tel" placeholder="Ou saisir un montant (min. 500 F)" style="margin-bottom:14px">
+    <div class="lbl">Réseau de réception</div>
+    <div class="wro ON" id="WO-W" onclick="selWR('wave')"><span style="font-size:22px">💛</span><div style="flex:1"><div style="font-size:13px;font-weight:700;color:var(--INK)">Wave</div><div style="font-size:12px;color:var(--INK3)">Instantané · 0% frais</div></div><span id="ck-W">✅</span></div>
+    <div class="wro" id="WO-O" onclick="selWR('orange')"><span style="font-size:22px">🟠</span><div style="flex:1"><div style="font-size:13px;font-weight:700;color:var(--INK)">Orange Money</div><div style="font-size:12px;color:var(--INK3)">Instantané · 1% frais</div></div><span id="ck-O" style="display:none">✅</span></div>
+    <div class="wro" id="WO-M" onclick="selWR('mtn')"><span style="font-size:22px">💛</span><div style="flex:1"><div style="font-size:13px;font-weight:700;color:var(--INK)">MTN Mobile Money</div><div style="font-size:12px;color:var(--INK3)">Instantané · 1% frais</div></div><span id="ck-M" style="display:none">✅</span></div>
+    <button class="btn bO" id="btn-wr">💸 Confirmer le retrait</button>
+    <button class="btn bGH" style="margin-top:9px" onclick="closeM('m-withdraw')">Annuler</button>
+  </div>
+</div>
+
+<!-- Incident -->
+<div class="MV" id="m-incident">
+  <div class="MS">
+    <div class="MH"></div>
+    <div class="MT">Signaler un incident</div>
+    <div class="MS2">Votre signalement arrive immédiatement à la base ON-GO. Réponse sous 5 min.</div>
+    <div class="inc-type-g">
+      <button class="incb" onclick="doInc('batterie_faible')">🔋 Batterie faible</button>
+      <button class="incb" onclick="doInc('panne')">🔧 Panne mécanique</button>
+      <button class="incb" onclick="doInc('accident')">🚑 Accident</button>
+      <button class="incb" onclick="doInc('embouteillage')">🚧 Embouteillage</button>
+    </div>
+    <input class="inp" id="inc-desc" placeholder="Description complémentaire (optionnel)…" style="margin-bottom:14px">
+    <button class="btn bGH" onclick="closeM('m-incident')">Annuler</button>
+  </div>
+</div>
+
+<!-- Fin service -->
+<div class="MV" id="m-endsvc">
+  <div class="MS">
+    <div class="MH"></div>
+    <div class="MT">Fin de service</div>
+    <div class="MS2">Récapitulatif de votre journée</div>
+    <div style="background:var(--BG);border-radius:12px;padding:15px;margin-bottom:15px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:9px"><span style="color:var(--INK3)">Total scans</span><strong id="es-tot">—</strong></div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:9px"><span style="color:var(--INK3)">Valides ✓</span><strong id="es-ok" style="color:var(--G)">—</strong></div>
+      <div style="display:flex;justify-content:space-between"><span style="color:var(--INK3)">Refusés ✗</span><strong id="es-ko" style="color:var(--R)">—</strong></div>
+    </div>
+    <div style="background:var(--GB);border:1px solid rgba(0,181,116,.2);border-radius:12px;padding:14px;margin-bottom:15px;text-align:center">
+      <div style="font-size:22px;margin-bottom:5px">🎉</div>
+      <div id="es-msg" style="font-size:14px;font-weight:700;color:var(--GD)">Bonne journée !</div>
+      <div style="font-size:12px;color:var(--INK2);margin-top:4px">N'oubliez pas de brancher le véhicule 🔌</div>
+    </div>
+    <button class="btn bR" id="btn-endsvc-ok">🔴 Confirmer la fin de service</button>
+    <button class="btn bGH" style="margin-top:9px" onclick="closeM('m-endsvc')">Continuer à conduire</button>
+  </div>
+</div>
+
+<!-- Ajouter chauffeur -->
+<div class="MV" id="m-adddrv">
+  <div class="MS">
+    <div class="MH"></div>
+    <div class="MT">Nouveau Chauffeur</div>
+    <div class="MS2">Le chauffeur recevra ses identifiants par SMS.</div>
+    <div class="lbl">Prénom</div><input class="inp" id="nd-prenom" type="text" placeholder="Koné" style="margin-bottom:11px">
+    <div class="lbl">Nom</div><input class="inp" id="nd-nom" type="text" placeholder="Issiaka" style="margin-bottom:11px">
+    <div class="lbl">Téléphone</div><input class="inp" id="nd-tel" type="tel" placeholder="+225 07 00 00 00 00" style="margin-bottom:11px">
+    <div class="lbl">Code PIN (4 chiffres)</div><input class="inp" id="nd-pin" type="tel" maxlength="4" placeholder="1234" style="margin-bottom:15px">
+    <button class="btn bG" id="btn-savedrv">✅ Enregistrer le chauffeur</button>
+    <button class="btn bGH" style="margin-top:9px" onclick="closeM('m-adddrv')">Annuler</button>
+  </div>
+</div>
+
+<!-- Edit profil -->
+<div class="MV" id="m-editpro">
+  <div class="MS">
+    <div class="MH"></div>
+    <div class="MT">Mes informations</div>
+    <div class="MS2">Informations liées à votre compte ON-GO.</div>
+    <div class="lbl">Prénom</div><input class="inp" id="ep-prenom" type="text" style="margin-bottom:11px">
+    <div class="lbl">Nom</div><input class="inp" id="ep-nom" type="text" style="margin-bottom:15px">
+    <button class="btn bG" id="btn-savepro">💾 Enregistrer</button>
+    <button class="btn bGH" style="margin-top:9px" onclick="closeM('m-editpro')">Annuler</button>
+  </div>
+</div>
+
+<!-- Support -->
+<div class="MV" id="m-support">
+  <div class="MS">
+    <div class="MH"></div>
+    <div class="MT">Aide & Support</div>
+    <div class="MS2">Disponible 7j/7 · 6h00–22h00</div>
+    <div style="display:flex;flex-direction:column;gap:9px;margin-bottom:14px">
+      <button class="btn bGH" onclick="closeM('m-support');T('info','WhatsApp ON-GO ouvert…')">💬 WhatsApp Support</button>
+      <button class="btn bGH" onclick="closeM('m-support');T('info','Appel 179 en cours…')">📞 Appeler le 179</button>
+      <button class="btn bGH" onclick="closeM('m-support');T('info','Email: contact@ongo-africa.ci')">✉️ contact@ongo-africa.ci</button>
+    </div>
+    <button class="btn bGH" onclick="closeM('m-support')">Fermer</button>
+  </div>
+</div>
+
+<div class="TOAST" id="toast"></div>
+
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+//  ON-GO AFRICA v2 — Architecture hybride
+//  ✅ Mode DEMO : fonctionne 100% PARTOUT (Claude, Chrome, mobile)
+//  ✅ Mode LIVE  : Supabase s'active automatiquement en dehors de Claude
+// ═══════════════════════════════════════════════════════
+(function(){
+'use strict';
+
+// ─── CONFIG SUPABASE ───
+var SB='https://ksaxjcojpygjxsxkizix.supabase.co';
+var SK='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtzYXhqY29qcHlnanhzeGtpeml4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MjA1NzksImV4cCI6MjA5MDE5NjU3OX0.5zxc6qMaf5vPpotFt75N8_w57LTf37yRnKNZQj21MEc';
+var SH={'apikey':SK,'Authorization':'Bearer '+SK,'Content-Type':'application/json','Prefer':'return=representation'};
+
+// Détecter si on est dans Claude (iframe) — désactiver Supabase dans ce cas
+var IN_CLAUDE = (function(){
+  try{ return window.self!==window.top; }catch(e){ return true; }
+})();
+
+function sbGet(t,q){
+  if(IN_CLAUDE) return Promise.resolve(null);
+  return fetch(SB+'/rest/v1/'+t+(q||''),{headers:SH}).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;});
+}
+function sbPost(t,d){
+  if(IN_CLAUDE) return Promise.resolve(null);
+  return fetch(SB+'/rest/v1/'+t,{method:'POST',headers:SH,body:JSON.stringify(d)}).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;});
+}
+function sbPatch(t,f,d){
+  if(IN_CLAUDE) return Promise.resolve(null);
+  return fetch(SB+'/rest/v1/'+t+'?'+f,{method:'PATCH',headers:SH,body:JSON.stringify(d)}).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;});
+}
+
+// ─── DONNÉES DEMO STATIQUES ─── (toujours présentes)
+var DB={
+  passagers:[
+    {id:'091b51f9-2005-4685-8f6d-24e5d0e97e7c',telephone:'+2250701000001',nom:'Kouadio',prenom:'Jean',code_qr:'ONGO-2026-JEAN-0001',statut_abonnement:'actif',type_pass:'mois',date_expiration:new Date(Date.now()+25*864e5).toISOString(),total_trajets:47},
+    {id:'841e8082-4f38-42fc-be04-5cf6c9666c77',telephone:'+2250701000002',nom:'Diabaté',prenom:'Fatou',code_qr:'ONGO-2026-FATOU-0002',statut_abonnement:'actif',type_pass:'semaine',date_expiration:new Date(Date.now()+4*864e5).toISOString(),total_trajets:12},
+    {id:'0ca46b9b-4959-4d3a-b53c-5b69d302069f',telephone:'+2250701000003',nom:'Bah',prenom:'Ibrahim',code_qr:'ONGO-2026-IBRA-0003',statut_abonnement:'inactif',type_pass:'jour',date_expiration:new Date(Date.now()-864e5).toISOString(),total_trajets:5},
+    {id:'a391a644-e75b-4fd6-be19-3a01698dd53f',telephone:'+2250701000004',nom:'Touré',prenom:'Aminata',code_qr:'ONGO-2026-AMIN-0004',statut_abonnement:'actif',type_pass:'mois',date_expiration:new Date(Date.now()+18*864e5).toISOString(),total_trajets:33}
+  ],
+  chauffeurs:[
+    {id:'12911f61-d19a-45d0-bf8d-08900ea6adbb',telephone:'+2250700000001',nom:'Koné',prenom:'Issiaka',code_pin:'1234',statut:'actif',solde_salaire:140000,solde_bonus:7500,scans_valides_jour:140,scans_refuses_jour:5,scans_valides_semaine:700},
+    {id:'2c600990-268c-43f5-9302-625bbe1a563a',telephone:'+2250700000002',nom:'Bamba',prenom:'Daouda',code_pin:'5678',statut:'actif',solde_salaire:140000,solde_bonus:6200,scans_valides_jour:132,scans_refuses_jour:3,scans_valides_semaine:660},
+    {id:'727f6852-c959-41ee-9fe5-21a57b5844c1',telephone:'+2250700000003',nom:'Ouattara',prenom:'Moussa',code_pin:'9012',statut:'actif',solde_salaire:140000,solde_bonus:4800,scans_valides_jour:118,scans_refuses_jour:8,scans_valides_semaine:590}
+  ],
+  vehicules:[
+    {id:'0db7e1e1-2732-4824-a75c-a7b2a606cb3f',code:'EV-01',niveau_batterie:85,places_occupees:18,capacite_places:22,statut:'en_service'},
+    {id:'070cd769-de12-4828-b9a6-f149bbade155',code:'EV-02',niveau_batterie:72,places_occupees:12,capacite_places:22,statut:'en_service'},
+    {id:'9d830963-576e-4f95-bccd-7da3eab2ed28',code:'EV-03',niveau_batterie:45,places_occupees:22,capacite_places:22,statut:'en_service'},
+    {id:'4f001bd8-cb34-41b7-9f65-284664cd49ef',code:'EV-04',niveau_batterie:95,places_occupees:0,capacite_places:22,statut:'en_charge'},
+    {id:'9b971ba7-77ac-422c-83de-778d1037cb33',code:'EV-05',niveau_batterie:60,places_occupees:8,capacite_places:22,statut:'en_service'}
+  ],
+  scans:[
+    {id:'s1',horodatage:new Date(Date.now()-3600000).toISOString(),passager_id:'091b51f9-2005-4685-8f6d-24e5d0e97e7c',vehicule_code:'EV-01',resultat:'valide'},
+    {id:'s2',horodatage:new Date(Date.now()-7200000).toISOString(),passager_id:'091b51f9-2005-4685-8f6d-24e5d0e97e7c',vehicule_code:'EV-02',resultat:'valide'},
+    {id:'s3',horodatage:new Date(Date.now()-86400000).toISOString(),passager_id:'091b51f9-2005-4685-8f6d-24e5d0e97e7c',vehicule_code:'EV-03',resultat:'valide'},
+    {id:'s4',horodatage:new Date(Date.now()-172800000).toISOString(),passager_id:'0ca46b9b-4959-4d3a-b53c-5b69d302069f',vehicule_code:'EV-01',resultat:'refuse'}
+  ],
+  transactions:[
+    {id:'t1',horodatage:new Date(Date.now()-86400000*2).toISOString(),passager_id:'091b51f9-2005-4685-8f6d-24e5d0e97e7c',type_transaction:'achat_pass',montant:15000,methode:'wave',statut:'reussi',details:{pass_type:'mois'}},
+    {id:'t2',horodatage:new Date(Date.now()-86400000*8).toISOString(),passager_id:'841e8082-4f38-42fc-be04-5cf6c9666c77',type_transaction:'achat_pass',montant:5000,methode:'orange_money',statut:'reussi',details:{pass_type:'semaine'}}
+  ]
+};
+
+// ─── STATE ───
+var ST={
+  mode:null,loginMode:null,phone:'',
+  passager:null,chauffeur:null,vehicule:null,
+  passType:'mois',mm:'wave',wrMethod:'wave',wrAmount:0,
+  mapT:null,etaT:null,pollT:null,
+  buses:[
+    {x:.22,y:.44,dx:.003,dy:.001,lbl:'EV-01',bat:85},
+    {x:.57,y:.58,dx:-.002,dy:.002,lbl:'EV-02',bat:72},
+    {x:.74,y:.34,dx:.001,dy:-.002,lbl:'EV-03',bat:45},
+    {x:.4,y:.72,dx:.002,dy:-.001,lbl:'EV-04',bat:94}
+  ]
+};
+
+// ─── UTILS ───
+function ge(id){return document.getElementById(id);}
+function G(id){ // go to page
+  document.querySelectorAll('.P').forEach(function(p){p.classList.remove('ON');});
+  var e=ge(id); if(e) e.classList.add('ON');
+}
+window.G=G;
+
+function openM(id){var e=ge(id);if(e)e.classList.add('ON');}
+function closeM(id){var e=ge(id);if(e)e.classList.remove('ON');}
+window.openM=openM; window.closeM=closeM;
+
+function T(type,msg){
+  var e=ge('toast');if(!e)return;
+  e.className='TOAST ON T-'+type;
+  e.textContent=msg;
+  clearTimeout(e._t);
+  e._t=setTimeout(function(){e.classList.remove('ON');},3500);
+}
+window.T=T;
+
+function F(n){return (n||0).toLocaleString('fr-FR')+' F';}
+function FD(iso){
+  if(!iso)return '—';
+  var d=new Date(iso);
+  return ('0'+d.getDate()).slice(-2)+'/'+('0'+(d.getMonth()+1)).slice(-2)+'/'+d.getFullYear()+' '+('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2);
+}
+function DL(iso){if(!iso)return 0;return Math.max(0,Math.ceil((new Date(iso)-new Date())/86400000));}
+function XT(id,v){var e=ge(id);if(e)e.textContent=v;}
+function SP(){return '<div class="spinner"></div>';}
+
+// ─── HORLOGE ───
+(function tick(){
+  var n=new Date(),t=('0'+n.getHours()).slice(-2)+':'+('0'+n.getMinutes()).slice(-2);
+  XT('clk',t);
+  setTimeout(tick,30000);
+})();
+
+// ─── SPLASH ───
+setTimeout(function(){G('s-home');},2600);
+
+// ─── HOME ───
+ge('pc-P').addEventListener('click',function(){loginStart('passager');});
+ge('pc-D').addEventListener('click',function(){loginStart('chauffeur');});
+ge('pc-A').addEventListener('click',function(){loginStart('admin');});
+
+function loginStart(mode){
+  ST.loginMode=mode;
+  var cfg={
+    passager:{ico:'🎫',tit:'Espace Passager',sub:'Numéro + code SMS',bg:'linear-gradient(155deg,#003D27,#007A4D)'},
+    chauffeur:{ico:'🚌',tit:'Espace Chauffeur',sub:'Numéro + Code PIN',bg:'linear-gradient(135deg,#7C1D06,#C84A13,#FF6020)'},
+    admin:{ico:'📊',tit:'Administration',sub:'Accès réservé ON-GO',bg:'linear-gradient(155deg,#1E3A8A,#1D4ED8)'}
+  }[mode];
+  ge('L-ico').textContent=cfg.ico;
+  XT('L-tit',cfg.tit); XT('L-sub',cfg.sub);
+  ge('L-hd').style.background=cfg.bg;
+  ge('btn-sendotp').style.background=mode==='passager'?'var(--G)':mode==='chauffeur'?'var(--O)':'var(--B)';
+  resetLogin(); G('s-login');
+}
+function resetLogin(){
+  ge('step-tel').style.display='block';
+  ge('step-otp').style.display='none';
+  ge('step-pin').style.display='none';
+  ['o0','o1','o2','o3','p0','p1','p2','p3'].forEach(function(id){var e=ge(id);if(e)e.value='';});
+}
+window.resetLogin=resetLogin;
+
+// Demo buttons
+ge('dP').addEventListener('click',function(){ST.loginMode='passager';launchPassager(DB.passagers[0]);});
+ge('dD').addEventListener('click',function(){ST.loginMode='chauffeur';launchChauffeur(DB.chauffeurs[0]);});
+ge('dA').addEventListener('click',function(){ST.loginMode='admin';launchAdmin();});
+
+// ─── OTP ───
+ge('btn-sendotp').addEventListener('click',function(){
+  var n=ge('ph-n').value.trim();
+  if(!n||n.replace(/\D/g,'').length<8){T('err','Numéro invalide (min. 8 chiffres)');return;}
+  ST.phone=ge('ph-cc').value+n.replace(/\s/g,'');
+  XT('otp-ph',ST.phone);
+  if(ST.loginMode==='chauffeur'){
+    // Chercher dans les données démo
+    var found=DB.chauffeurs.filter(function(c){return c.telephone===ST.phone;})[0]||null;
+    if(found){
+      ST.chauffeur=found;
+      ge('step-tel').style.display='none';
+      ge('step-pin').style.display='block';
+      setupPIN();
+      T('ok','✓ Identifié — Entrez votre PIN');
+    } else {
+      ge('step-tel').style.display='none';
+      ge('step-otp').style.display='block';
+      setupOTP();
+      T('ok','Code SMS envoyé au '+ST.phone+' (pilote: 0000)');
+    }
+  } else {
+    ge('step-tel').style.display='none';
+    ge('step-otp').style.display='block';
+    setupOTP();
+    T('ok','Code SMS envoyé au '+ST.phone+' (pilote: 0000)');
+  }
+});
+
+ge('btn-resend').addEventListener('click',function(){T('ok','Nouveau code envoyé !');});
+
+function setupOTP(){
+  ['o0','o1','o2','o3'].forEach(function(id,i){
+    var el=ge(id);if(!el)return;
+    el.value='';
+    el.oninput=function(){
+      if(!this.value)return;
+      var nx=ge('o'+(i+1));if(nx)nx.focus();
+      if(i===3)verifyOTP();
+    };
+    el.onkeydown=function(e){if(e.key==='Backspace'&&!this.value&&i>0){var p=ge('o'+(i-1));if(p)p.focus();}};
+  });
+  setTimeout(function(){var e=ge('o0');if(e)e.focus();},150);
+}
+ge('btn-verify').addEventListener('click',verifyOTP);
+function verifyOTP(){
+  var code=['o0','o1','o2','o3'].map(function(id){var e=ge(id);return e?e.value:'';}).join('');
+  if(code.length<4){T('err','Entrez les 4 chiffres');return;}
+  // Code pilote universel = 0000
+  if(ST.loginMode==='passager'){
+    // Chercher dans démo d'abord
+    var p=DB.passagers.filter(function(x){return x.telephone===ST.phone;})[0]||null;
+    if(!p&&!IN_CLAUDE){
+      // Essayer Supabase (téléphone téléchargé hors Claude)
+      sbGet('passagers','?telephone=eq.'+encodeURIComponent(ST.phone)+'&select=*').then(function(d){
+        var found=d&&d.length?d[0]:null;
+        if(found){launchPassager(found);}
+        else{
+          var qr='ONGO-'+Date.now()+'-'+Math.random().toString(36).slice(2,6).toUpperCase();
+          sbPost('passagers',{telephone:ST.phone,code_qr:qr,statut_abonnement:'inactif'}).then(function(r){
+            launchPassager(r&&r.length?r[0]:{telephone:ST.phone,code_qr:qr,statut_abonnement:'inactif'});
+          });
+        }
+      });
+    } else {
+      if(!p) p={telephone:ST.phone,code_qr:'ONGO-DEMO-'+Date.now(),statut_abonnement:'inactif'};
+      launchPassager(p);
+    }
+  } else if(ST.loginMode==='admin'){
+    launchAdmin();
+  }
+}
+
+function setupPIN(){
+  ['p0','p1','p2','p3'].forEach(function(id,i){
+    var el=ge(id);if(!el)return;
+    el.value='';
+    el.oninput=function(){
+      if(!this.value)return;
+      var nx=ge('p'+(i+1));if(nx)nx.focus();
+      if(i===3)verifyPIN();
+    };
+    el.onkeydown=function(e){if(e.key==='Backspace'&&!this.value&&i>0){var p=ge('p'+(i-1));if(p)p.focus();}};
+  });
+  setTimeout(function(){var e=ge('p0');if(e)e.focus();},150);
+}
+ge('btn-pin').addEventListener('click',verifyPIN);
+function verifyPIN(){
+  var pin=['p0','p1','p2','p3'].map(function(id){var e=ge(id);return e?e.value:'';}).join('');
+  var c=ST.chauffeur||DB.chauffeurs[0];
+  if(c.code_pin===pin||pin==='0000'){
+    launchChauffeur(c);
+  } else {
+    T('err','Code PIN incorrect (0000 pour le pilote)');
+    ['p0','p1','p2','p3'].forEach(function(id){var e=ge(id);if(e)e.value='';});
+    var e=ge('p0');if(e)e.focus();
+  }
+}
+
+// ═══════════════════════════
+//  PASSAGER
+// ═══════════════════════════
+function launchPassager(data){
+  ST.mode='passager'; ST.passager=data||DB.passagers[0];
+  G('s-P-home'); initMap(); startETA(); startPoll();
+  renderPUI(); loadTrips(); loadPurchases();
+  T('ok','✅ Bienvenue sur ON-GO Africa 🎫');
+}
+
+function renderPUI(){
+  var p=ST.passager; if(!p)return;
+  var name=((p.prenom||'')+' '+(p.nom||'')).trim()||'Passager';
+  XT('P-ava',(name[0]||'P').toUpperCase());
+  XT('P-tel',p.telephone||'—');
+  XT('P-name',name);
+  XT('P-trips',String(p.total_trajets||0));
+  XT('P-ptype',p.type_pass||'—');
+  refreshChip(p);
+  drawQR(p.code_qr||'ONGO-DEMO');
+}
+
+function refreshChip(p){
+  var chip=ge('pass-chip'),ico=ge('chip-ico'),tit=ge('chip-tit'),sub=ge('chip-sub');
+  var qz=ge('qr-zone'),nz=ge('nopass-zone'); if(!chip)return;
+  var now=new Date();
+  var active=p.statut_abonnement==='actif'&&p.date_expiration&&new Date(p.date_expiration)>now;
+  if(active){
+    chip.className='chip chip-A'; ico.textContent='✅'; tit.textContent='Pass Actif';
+    var types={jour:'Jour',semaine:'Semaine',mois:'Mois'};
+    sub.textContent='Pass '+(types[p.type_pass]||p.type_pass||'')+' · Valide encore '+DL(p.date_expiration)+' jour(s)';
+    if(qz)qz.style.display='block'; if(nz)nz.style.display='none';
+  } else {
+    chip.className='chip '+(p.date_expiration&&new Date(p.date_expiration)<now?'chip-X':'chip-N');
+    ico.textContent=p.date_expiration&&new Date(p.date_expiration)<now?'⏰':'🎫';
+    tit.textContent=p.date_expiration&&new Date(p.date_expiration)<now?'Pass Expiré':'Aucun pass actif';
+    sub.textContent=p.date_expiration&&new Date(p.date_expiration)<now?'Renouveler pour voyager':'Achetez votre premier pass ON-GO';
+    if(qz)qz.style.display='none'; if(nz)nz.style.display='block';
+  }
+}
+
+function loadTrips(){
+  var el=ge('trips-list'); if(!el)return;
+  var p=ST.passager;
+  // Utiliser données démo en priorité dans Claude, Supabase sinon
+  var demoTrips=DB.scans.filter(function(s){return s.passager_id===p.id;});
+  if(IN_CLAUDE||!p.id){
+    renderTrips(demoTrips);
+  } else {
+    sbGet('scans','?passager_id=eq.'+p.id+'&order=horodatage.desc&limit=20&select=*,vehicules(code)').then(function(d){
+      renderTrips(d&&d.length?d:demoTrips);
+    });
+  }
+}
+
+function renderTrips(data){
+  var el=ge('trips-list'); if(!el)return;
+  if(!data||!data.length){el.innerHTML='<div style="text-align:center;padding:24px;color:var(--INK4)">Aucun trajet pour l\'instant</div>';return;}
+  el.innerHTML=data.map(function(s){
+    var ok=s.resultat==='valide';
+    var veh=s.vehicules?s.vehicules.code:(s.vehicule_code||'—');
+    return '<div class="card" style="display:flex;align-items:center;gap:11px">'+
+      '<div style="width:40px;height:40px;border-radius:11px;background:'+(ok?'var(--GB)':'var(--RB)')+';display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0">🚌</div>'+
+      '<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;color:var(--INK)">Treichville → Grand-Bassam</div><div style="font-size:11px;color:var(--INK4);margin-top:1px">'+FD(s.horodatage)+' · '+veh+'</div></div>'+
+      '<span class="bdg '+(ok?'bdg-G':'bdg-R')+'">'+(ok?'Validé':'Refusé')+'</span>'+
+      '</div>';
+  }).join('');
+}
+
+function loadPurchases(){
+  var el=ge('purch-list'); if(!el)return;
+  var p=ST.passager;
+  var demoTx=DB.transactions.filter(function(t){return t.passager_id===p.id;});
+  if(IN_CLAUDE||!p.id){
+    renderPurchases(demoTx);
+  } else {
+    sbGet('transactions','?passager_id=eq.'+p.id+'&type_transaction=eq.achat_pass&order=horodatage.desc&limit=20').then(function(d){
+      renderPurchases(d&&d.length?d:demoTx);
+    });
+  }
+}
+
+function renderPurchases(data){
+  var el=ge('purch-list'); if(!el)return;
+  if(!data||!data.length){el.innerHTML='<div style="text-align:center;padding:24px;color:var(--INK4)">Aucun achat pour l\'instant</div>';return;}
+  el.innerHTML=data.map(function(tx){
+    return '<div class="card" style="display:flex;align-items:center;gap:11px">'+
+      '<div style="width:40px;height:40px;border-radius:11px;background:var(--GB);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0">💰</div>'+
+      '<div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--INK)">Pass '+(tx.details&&tx.details.pass_type?tx.details.pass_type:'—')+'</div><div style="font-size:11px;color:var(--INK4);margin-top:1px">'+FD(tx.horodatage)+(tx.methode?' · '+tx.methode:'')+'</div></div>'+
+      '<div style="font-size:13px;font-weight:700;color:var(--R)">-'+F(tx.montant)+'</div>'+
+      '</div>';
+  }).join('');
+}
+
+window.histTab=function(tab){
+  ge('ht-trips').className='btn '+(tab==='trips'?'bG':'bGH')+' '; ge('ht-trips').style.fontSize='13px'; ge('ht-trips').style.padding='10px 14px'; ge('ht-trips').style.width='auto';
+  ge('ht-purch').className='btn '+(tab==='purch'?'bG':'bGH')+' '; ge('ht-purch').style.fontSize='13px'; ge('ht-purch').style.padding='10px 14px'; ge('ht-purch').style.width='auto';
+  ge('trips-list').style.display=tab==='trips'?'flex':'none';
+  ge('purch-list').style.display=tab==='purch'?'flex':'none';
+};
+
+window.pNav=function(btn){
+  var t=btn.getAttribute('data-s');
+  document.querySelectorAll('.NT[data-s]').forEach(function(b){
+    if(['s-P-home','s-P-pass','s-P-hist','s-P-profil'].indexOf(b.getAttribute('data-s'))>=0)
+      b.classList.toggle('ON',b.getAttribute('data-s')===t);
+  });
+  G(t);
+};
+
+// Renew
+ge('btn-renew').addEventListener('click',function(){openM('m-renew');});
+
+window.selPass=function(type){
+  ST.passType=type;
+  ['J','S','M'].forEach(function(k){
+    var e=ge('PO-'+k); if(e) e.classList.toggle('ON',(type==='jour'&&k==='J')||(type==='semaine'&&k==='S')||(type==='mois'&&k==='M'));
+  });
+  var pr={jour:'1 000',semaine:'5 000',mois:'15 000'};
+  var mn={wave:'Wave',orange:'Orange',mtn:'MTN'};
+  var b=ge('btn-pay'); if(b) b.textContent='💳 Payer '+(pr[type]||'15 000')+' F via '+(mn[ST.mm]||'Wave');
+};
+
+window.selMM=function(mm){
+  ST.mm=mm;
+  ['W','O','M'].forEach(function(k){
+    var e=ge('MM-'+k);if(e)e.classList.toggle('ON',(mm==='wave'&&k==='W')||(mm==='orange'&&k==='O')||(mm==='mtn'&&k==='M'));
+  });
+  var pr={jour:'1 000',semaine:'5 000',mois:'15 000'};
+  var mn={wave:'Wave',orange:'Orange Money',mtn:'MTN'};
+  var b=ge('btn-pay');if(b)b.textContent='💳 Payer '+(pr[ST.passType]||'15 000')+' F via '+(mn[mm]||mm);
+};
+
+ge('btn-pay').addEventListener('click',function(){
+  var btn=ge('btn-pay'); btn.disabled=true; btn.innerHTML=SP()+' Traitement '+ST.mm+'…';
+  var amounts={jour:1000,semaine:5000,mois:15000};
+  var durations={jour:1,semaine:7,mois:30};
+  var exp=new Date(Date.now()+(durations[ST.passType]||30)*86400000);
+  // Mettre à jour en démo local
+  if(ST.passager){
+    ST.passager.statut_abonnement='actif';
+    ST.passager.type_pass=ST.passType;
+    ST.passager.date_expiration=exp.toISOString();
+    // Ajouter à l'historique démo
+    DB.transactions.unshift({id:'t-new-'+Date.now(),horodatage:new Date().toISOString(),passager_id:ST.passager.id,type_transaction:'achat_pass',montant:amounts[ST.passType],methode:ST.mm,statut:'reussi',details:{pass_type:ST.passType}});
+  }
+  // Supabase en dehors de Claude
+  if(!IN_CLAUDE&&ST.passager&&ST.passager.id){
+    sbPatch('passagers','id=eq.'+ST.passager.id,{statut_abonnement:'actif',type_pass:ST.passType,montant_paye:amounts[ST.passType],date_expiration:exp.toISOString(),methode_paiement:ST.mm});
+    sbPost('transactions',{passager_id:ST.passager.id,type_transaction:'achat_pass',montant:amounts[ST.passType],methode:ST.mm,statut:'reussi',details:{pass_type:ST.passType}});
+  }
+  setTimeout(function(){
+    btn.disabled=false; btn.textContent='💳 Payer 15 000 F via Wave';
+    closeM('m-renew'); refreshChip(ST.passager);
+    drawQR(ST.passager&&ST.passager.code_qr?ST.passager.code_qr:'ONGO-DEMO');
+    loadPurchases();
+    T('ok','✅ Pass '+ST.passType+' activé ! Bon voyage 🚌');
+  },1800);
+});
+
+// Edit profil
+ge('btn-editpro').addEventListener('click',function(){
+  ge('ep-prenom').value=ST.passager&&ST.passager.prenom?ST.passager.prenom:'';
+  ge('ep-nom').value=ST.passager&&ST.passager.nom?ST.passager.nom:'';
+  openM('m-editpro');
+});
+ge('btn-savepro').addEventListener('click',function(){
+  var p=ge('ep-prenom').value.trim(),n=ge('ep-nom').value.trim();
+  if(!p||!n){T('err','Entrez prénom et nom');return;}
+  if(ST.passager){ST.passager.nom=n;ST.passager.prenom=p;}
+  if(!IN_CLAUDE&&ST.passager&&ST.passager.id) sbPatch('passagers','id=eq.'+ST.passager.id,{nom:n,prenom:p});
+  closeM('m-editpro');
+  XT('P-name',p+' '+n); XT('P-ava',(p[0]||'P').toUpperCase());
+  T('ok','✅ Profil mis à jour');
+});
+
+ge('btn-logout-P').addEventListener('click',logout);
+
+// ═══════════════════════════
+//  CHAUFFEUR
+// ═══════════════════════════
+function launchChauffeur(data){
+  ST.mode='chauffeur'; ST.chauffeur=data||DB.chauffeurs[0];
+  G('s-D-home'); renderDUI(); startPoll();
+  T('ok','✅ Bonne journée '+(ST.chauffeur.prenom||'')+ ' 🚌');
+}
+
+function renderDUI(){
+  var c=ST.chauffeur||DB.chauffeurs[0];
+  XT('D-name',(c.prenom||'')+' '+(c.nom||''));
+  // Véhicule
+  var v=DB.vehicules.filter(function(x){return x.chauffeur_id===c.id;})[0]||DB.vehicules[0];
+  ST.vehicule=v; applyVehicle(v);
+  refreshStats(c.scans_valides_jour||0,c.scans_refuses_jour||0);
+  // Wallet
+  var tot=(c.solde_salaire||0)+(c.solde_bonus||0);
+  ST.wrAmount=tot;
+  XT('W-tot',F(tot)); XT('W-sal',F(c.solde_salaire||0)); XT('W-bon',F(c.solde_bonus||0));
+  XT('W-break',F(c.solde_salaire||0)+' salaire + '+F(c.solde_bonus||0)+' bonus');
+  XT('amtall','Tout ('+F(tot)+')');
+  // Perfs
+  refreshPerfs(c);
+}
+
+function applyVehicle(v){
+  XT('D-veh','Véhicule : '+(v.code||'EV-01')+' · Ligne Treichville–Bassam');
+  var bat=v.niveau_batterie||85;
+  XT('D-bat',bat+'%');
+  ge('D-bat').style.color=bat>50?'var(--G)':bat>20?'var(--Y)':'var(--R)';
+  var fill=ge('D-batfill');
+  if(fill){fill.style.width=bat+'%';fill.style.background=bat>50?'linear-gradient(90deg,var(--G),var(--GL))':bat>20?'var(--Y)':'var(--R)';}
+  var occ=v.places_occupees||0,cap=v.capacite_places||22;
+  var capEl=ge('D-cap');
+  if(capEl)capEl.innerHTML=occ+' <span style="font-size:12px;color:var(--INK4);font-weight:400">/ '+cap+'</span>';
+  var cf=ge('D-capfill');if(cf)cf.style.width=(occ/cap*100)+'%';
+  XT('D-station',bat<40?'🔌 URGENT — Aller en charge !':'🔌 Treichville · 2.4km');
+}
+
+function refreshStats(ok,ko){
+  var tot=ok+ko;
+  XT('D-tot',String(tot)); XT('D-ok',String(ok)); XT('D-ko',String(ko));
+  XT('es-tot',String(tot)); XT('es-ok',String(ok)); XT('es-ko',String(ko));
+  XT('es-msg',ok>=100?'🏆 Excellente journée !':ok>=50?'👍 Bonne journée !':'Bon début !');
+}
+
+function refreshPerfs(c){
+  var ok=c.scans_valides_jour||0,ko=c.scans_refuses_jour||0;
+  var sem=c.scans_valides_semaine||ok,obj=800;
+  var pct=Math.min(100,Math.round(sem/obj*100));
+  XT('bpct',pct+'%');
+  var arc=ge('barc');if(arc)arc.style.strokeDashoffset=390-(390*pct/100);
+  XT('crit-s',sem+'/'+obj);
+  var ref=(ok+ko)>0?Math.round(ko/(ok+ko)*100):0;
+  XT('crit-r',ref+'% ('+(ref<5?'bon':'à améliorer')+')');
+  var b1=ge('crit-b1');if(b1)b1.style.width=Math.min(100,sem/obj*100)+'%';
+  var b3=ge('crit-b3');if(b3)b3.style.width=(100-ref)+'%';
+  XT('bhint',pct>=80?'🎯 Objectif presque atteint !':'Encore '+Math.max(0,obj-sem)+' scans pour le bonus.');
+}
+
+window.dNav=function(btn){
+  var t=btn.getAttribute('data-s');
+  document.querySelectorAll('.NT[data-s]').forEach(function(b){
+    if(['s-D-home','s-D-scan','s-D-perf','s-D-wallet'].indexOf(b.getAttribute('data-s'))>=0)
+      b.classList.toggle('ON',b.getAttribute('data-s')===t);
+  });
+  G(t);
+};
+
+// ─── SCANNER ───
+ge('btn-openscan').addEventListener('click',openScanner);
+function openScanner(){G('s-D-scan');drawScanBg();ge('scan-res').style.display='none';ge('scan-ui').style.display='flex';var i=ge('scan-inp');if(i){i.value='';setTimeout(function(){i.focus();},200);}}
+window.openScanner=openScanner;
+
+function drawScanBg(){
+  var cv=ge('cv-scanbg');if(!cv)return;
+  cv.width=390;cv.height=700;
+  var ctx=cv.getContext('2d');
+  ctx.fillStyle='#0A0B14';ctx.fillRect(0,0,390,700);
+  ctx.strokeStyle='rgba(0,181,116,.06)';ctx.lineWidth=1;
+  for(var x=0;x<390;x+=28){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,700);ctx.stroke();}
+  for(var y=0;y<700;y+=28){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(390,y);ctx.stroke();}
+}
+
+ge('btn-scanok').addEventListener('click',function(){
+  var code=ge('scan-inp').value.trim().toUpperCase();
+  if(!code){T('err','Entrez un code QR');return;}
+  processScan(code); ge('scan-inp').value='';
+});
+ge('scan-inp').addEventListener('keydown',function(e){
+  if(e.key==='Enter'){var c=this.value.trim().toUpperCase();if(c){processScan(c);this.value='';}}
+});
+
+function processScan(code){
+  // Chercher dans données démo
+  var p=DB.passagers.filter(function(x){return x.code_qr===code;})[0]||null;
+  if(p){
+    var now=new Date();
+    var valid=p.statut_abonnement==='actif'&&p.date_expiration&&new Date(p.date_expiration)>now;
+    if(valid){
+      showScanResult(true,'✅',(p.prenom||'')+' '+(p.nom||''),'Pass '+(p.type_pass||'')+' · Valide · '+DL(p.date_expiration)+'j');
+      incrCap();
+    } else {
+      var r=p.date_expiration&&new Date(p.date_expiration)<now?'Pass expiré':'Pass inactif';
+      showScanResult(false,'❌',(p.prenom||'')+' '+(p.nom||''),r+' — Demander renouvellement');
+    }
+  } else {
+    // Si hors Claude, essayer Supabase
+    if(!IN_CLAUDE){
+      sbGet('passagers','?code_qr=eq.'+encodeURIComponent(code)+'&select=*').then(function(d){
+        if(d&&d.length){
+          var pp=d[0];
+          var v=pp.statut_abonnement==='actif'&&pp.date_expiration&&new Date(pp.date_expiration)>new Date();
+          showScanResult(v,'✅',(pp.prenom||'')+' '+(pp.nom||''),v?'Pass '+pp.type_pass+' · Valide':'Pass expiré');
+          if(v)incrCap();
+        } else {
+          showScanResult(false,'🚫','Code inconnu','QR non reconnu dans ON-GO Africa');
+        }
+      });
+    } else {
+      showScanResult(false,'🚫','Code inconnu','QR non reconnu dans ON-GO Africa');
+    }
+  }
+}
+
+function showScanResult(ok,icon,name,detail){
+  var res=ge('scan-res'),ui=ge('scan-ui');
+  if(ui)ui.style.display='none';
+  if(res){
+    res.style.display='flex';
+    res.style.flexDirection='column';
+    res.style.alignItems='center';
+    res.style.justifyContent='center';
+    res.style.background=ok?'rgba(0,112,55,.95)':'rgba(180,20,35,.95)';
+    res.innerHTML='<div style="font-size:68px;margin-bottom:13px">'+icon+'</div>'+
+      '<div style="font-size:21px;font-weight:800;color:#fff;text-align:center">'+name+'</div>'+
+      '<div style="font-size:13px;color:rgba(255,255,255,.75);margin-top:7px;text-align:center">'+detail+'</div>';
+  }
+  if(navigator.vibrate)navigator.vibrate(ok?[60,40,60]:[200,100,200]);
+  // Update stats
+  var c=ST.chauffeur||DB.chauffeurs[0];
+  if(ok){c.scans_valides_jour=(c.scans_valides_jour||0)+1;}
+  else{c.scans_refuses_jour=(c.scans_refuses_jour||0)+1;}
+  refreshStats(c.scans_valides_jour||0,c.scans_refuses_jour||0);
+  if(!IN_CLAUDE&&c.id) sbPatch('chauffeurs','id=eq.'+c.id,{scans_valides_jour:c.scans_valides_jour,scans_refuses_jour:c.scans_refuses_jour});
+  T(ok?'ok':'err',ok?'✅ '+name+' — Accès autorisé':'❌ '+name+' — Refusé');
+  setTimeout(function(){if(res)res.style.display='none';if(ui)ui.style.display='flex';},3500);
+}
+
+function incrCap(){
+  var v=ST.vehicule||DB.vehicules[0];
+  v.places_occupees=Math.min(v.capacite_places||22,(v.places_occupees||0)+1);
+  applyVehicle(v);
+  if(!IN_CLAUDE&&v.id) sbPatch('vehicules','id=eq.'+v.id,{places_occupees:v.places_occupees});
+}
+
+// Incident
+ge('btn-incident').addEventListener('click',function(){openM('m-incident');});
+window.doInc=function(type){
+  var desc=ge('inc-desc').value.trim();
+  // Log local
+  if(!IN_CLAUDE&&ST.chauffeur&&ST.chauffeur.id){
+    sbPost('incidents',{chauffeur_id:ST.chauffeur.id,vehicule_id:ST.vehicule?ST.vehicule.id:null,type_incident:type,description:desc||type,statut:'ouvert'});
+  }
+  closeM('m-incident'); ge('inc-desc').value='';
+  T('warn','⚠️ Incident signalé ! '+(IN_CLAUDE?'(Hors Claude, la base sera alertée)':'Base ON-GO alertée !'));
+};
+
+// Fin service
+function openEndSvc(){openM('m-endsvc');}
+ge('btn-endsvc').addEventListener('click',openEndSvc);
+ge('btn-endsvc2').addEventListener('click',openEndSvc);
+ge('btn-endsvc-ok').addEventListener('click',function(){
+  if(!IN_CLAUDE&&ST.chauffeur&&ST.chauffeur.id){
+    sbPatch('chauffeurs','id=eq.'+ST.chauffeur.id,{statut:'inactif',scans_valides_jour:0,scans_refuses_jour:0});
+    if(ST.vehicule&&ST.vehicule.id) sbPatch('vehicules','id=eq.'+ST.vehicule.id,{places_occupees:0,statut:'en_charge'});
+  }
+  closeM('m-endsvc');
+  T('ok','🔌 Service terminé. Bonne nuit !');
+  setTimeout(logout,2000);
+});
+
+// Retrait
+ge('btn-withdraw').addEventListener('click',function(){
+  var tot=(ST.chauffeur?((ST.chauffeur.solde_salaire||0)+(ST.chauffeur.solde_bonus||0)):147500);
+  ST.wrAmount=tot;
+  var b=ge('btn-wr');if(b)b.textContent='💸 Retirer '+F(tot)+' via Wave';
+  openM('m-withdraw');
+});
+window.setAmt=function(el,amt){
+  document.querySelectorAll('.amtb').forEach(function(b){b.classList.remove('ON');});
+  el.classList.add('ON'); ST.wrAmount=amt;
+  var b=ge('btn-wr');if(b)b.textContent='💸 Retirer '+F(amt)+' via '+(ST.wrMethod==='wave'?'Wave':'Orange/MTN');
+};
+window.setAmtAll=function(el){
+  document.querySelectorAll('.amtb').forEach(function(b){b.classList.remove('ON');});
+  el.classList.add('ON'); ST.wrAmount=ST.chauffeur?((ST.chauffeur.solde_salaire||0)+(ST.chauffeur.solde_bonus||0)):147500;
+  var b=ge('btn-wr');if(b)b.textContent='💸 Retirer '+F(ST.wrAmount)+' via '+(ST.wrMethod==='wave'?'Wave':'Orange/MTN');
+};
+window.selWR=function(m){
+  ST.wrMethod=m;
+  ['W','O','M'].forEach(function(k){
+    var e=ge('WO-'+k),c=ge('ck-'+k);
+    var on=(m==='wave'&&k==='W')||(m==='orange'&&k==='O')||(m==='mtn'&&k==='M');
+    if(e)e.classList.toggle('ON',on); if(c)c.style.display=on?'inline':'none';
+  });
+};
+
+ge('btn-wr').addEventListener('click',function(){
+  var btn=ge('btn-wr');
+  var amt=parseInt(ge('amt-custom').value)||ST.wrAmount;
+  if(!amt||amt<500){T('err','Montant minimum : 500 F');return;}
+  var tot=ST.chauffeur?((ST.chauffeur.solde_salaire||0)+(ST.chauffeur.solde_bonus||0)):147500;
+  if(amt>tot){T('err','Solde insuffisant ('+F(tot)+')');return;}
+  btn.disabled=true; btn.innerHTML=SP()+' Envoi en cours…';
+  // Mise à jour locale
+  if(ST.chauffeur){
+    var rest=Math.max(0,tot-amt);
+    ST.chauffeur.solde_salaire=rest; ST.chauffeur.solde_bonus=0;
+    DB.transactions.unshift({id:'tx-'+Date.now(),horodatage:new Date().toISOString(),chauffeur_id:ST.chauffeur.id,type_transaction:'retrait_salaire',montant:amt,methode:ST.wrMethod,statut:'reussi'});
+  }
+  // Supabase hors Claude
+  if(!IN_CLAUDE&&ST.chauffeur&&ST.chauffeur.id){
+    sbPost('transactions',{chauffeur_id:ST.chauffeur.id,type_transaction:'retrait_salaire',montant:amt,methode:ST.wrMethod,statut:'reussi'});
+    sbPatch('chauffeurs','id=eq.'+ST.chauffeur.id,{solde_salaire:ST.chauffeur.solde_salaire,solde_bonus:0});
+  }
+  setTimeout(function(){
+    btn.disabled=false; btn.textContent='💸 Confirmer le retrait';
+    closeM('m-withdraw'); renderDUI();
+    T('ok','💸 '+F(amt)+' envoyés ! Virement en cours…');
+  },1800);
+});
+
+// ═══════════════════════════
+//  ADMIN
+// ═══════════════════════════
+function launchAdmin(){
+  ST.mode='admin'; G('s-A-dash');
+  setAdminDate(); initAdminMap(); buildBarChart(); buildFleetList(); startPoll();
+  // Charger KPIs depuis Supabase si hors Claude
+  if(!IN_CLAUDE){
+    sbGet('scans','?horodatage=gte.'+new Date().toISOString().split('T')[0]+'T00:00:00&resultat=eq.valide&select=id').then(function(d){
+      var n=d?d.length:390; XT('kpi-scans',String(n));
+      XT('kpi-rev',F(n*3000)); XT('fin-rev',F(n*3000));
+    });
+    sbGet('incidents','?statut=eq.ouvert&select=*').then(function(d){
+      var n=(d||[]).length; XT('kpi-inc',String(n));
+      XT('kpi-inc-t',n===0?'✅ Aucun':n+' actif(s)');
+      renderIncs(d||[]);
+    });
+  }
+  T('ok','✅ Tableau de bord — ON-GO Africa');
+}
+
+function setAdminDate(){
+  var d=new Date();
+  var days=['DIMANCHE','LUNDI','MARDI','MERCREDI','JEUDI','VENDREDI','SAMEDI'];
+  var months=['JANVIER','FÉVRIER','MARS','AVRIL','MAI','JUIN','JUILLET','AOÛT','SEPTEMBRE','OCTOBRE','NOVEMBRE','DÉCEMBRE'];
+  XT('admin-date',days[d.getDay()]+' '+d.getDate()+' '+months[d.getMonth()]+' '+d.getFullYear());
+}
+
+function buildBarChart(){
+  var el=ge('barchart');if(!el)return;
+  var days=['L','M','M','J','V','S','D'],vals=[390,428,375,468,415,432,450];
+  var max=Math.max.apply(null,vals);
+  el.innerHTML=days.map(function(d,i){
+    var pct=Math.round(vals[i]/max*100);
+    var col=i===5?'var(--G)':i===6?'var(--O)':'rgba(0,181,116,.28)';
+    return '<div class="bc"><div class="bcf" style="height:'+pct+'%;background:'+col+'" onclick="T(\'info\',\''+d+' : '+vals[i]+' k F\')"></div><div class="bcl">'+d+'</div></div>';
+  }).join('');
+}
+
+function buildFleetList(){
+  var el=ge('fleet-list');if(!el)return;
+  el.innerHTML=DB.vehicules.map(function(v){
+    var bat=v.niveau_batterie||0,bc=bat>50?'var(--G)':bat>20?'var(--Y)':'var(--R)';
+    return '<div class="fleet-item">'+
+      '<div class="fi-code">'+v.code+'</div>'+
+      '<div style="flex:1">'+
+        '<div style="display:flex;justify-content:space-between;align-items:center">'+
+          '<span style="font-size:12px;font-weight:600;color:var(--INK)">'+v.statut.replace(/_/g,' ')+'</span>'+
+          '<span class="bdg '+(v.statut==='en_service'?'bdg-G':v.statut==='en_charge'?'bdg-B':'bdg-Y')+'">'+bat+'% 🔋</span>'+
+        '</div>'+
+        '<div style="font-size:11px;color:var(--INK4);margin-top:2px">👥 '+v.places_occupees+'/'+v.capacite_places+'</div>'+
+        '<div class="fi-bar"><div style="height:100%;width:'+bat+'%;background:'+bc+'"></div></div>'+
+      '</div></div>';
+  }).join('');
+}
+
+function renderIncs(data){
+  var el=ge('inc-list');if(!el)return;
+  if(!data.length){el.innerHTML='<div style="text-align:center;padding:14px;background:var(--GB);border-radius:12px;color:var(--GD);font-weight:600">✅ Aucun incident actif</div>';return;}
+  var icos={panne:'🔧',accident:'🚑',embouteillage:'🚧',batterie_faible:'🔋',autre:'⚠️'};
+  el.innerHTML=data.map(function(inc){
+    var ico=icos[inc.type_incident]||'⚠️';
+    var veh=inc.vehicules?inc.vehicules.code:'—';
+    var ch=inc.chauffeurs?(inc.chauffeurs.prenom+' '+inc.chauffeurs.nom):'—';
+    return '<div class="inccard '+inc.statut+'">'+
+      '<div style="font-size:20px">'+ico+'</div>'+
+      '<div style="flex:1">'+
+        '<div style="font-size:13px;font-weight:700;color:var(--INK)">'+veh+' · '+inc.type_incident.replace(/_/g,' ')+'</div>'+
+        '<div style="font-size:11px;color:var(--INK4);margin-top:2px">'+FD(inc.horodatage)+' · '+ch+'</div>'+
+        (inc.description&&inc.description!==inc.type_incident?'<div style="font-size:11px;color:var(--INK2);margin-top:2px">'+inc.description+'</div>':'')+
+      '</div>'+
+      '<button style="padding:7px 11px;border:none;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;font-family:var(--F);background:var(--BB);color:var(--BD)" onclick="handleInc(\''+inc.id+'\',this)">'+(inc.statut==='resolu'?'✅':'Gérer')+'</button>'+
+      '</div>';
+  }).join('');
+}
+
+window.handleInc=function(id,btn){
+  btn.textContent='✅';btn.disabled=true;
+  if(!IN_CLAUDE) sbPatch('incidents','id=eq.'+id,{statut:'en_cours'});
+  T('ok','Incident pris en charge');
+};
+
+window.toggleDrv=function(id,statut,btn){
+  var ns=statut==='actif'?'suspendu':'actif';
+  btn.disabled=true;
+  // Mise à jour locale
+  var c=DB.chauffeurs.filter(function(x){return x.id===id;})[0];
+  if(c) c.statut=ns;
+  if(!IN_CLAUDE) sbPatch('chauffeurs','id=eq.'+id,{statut:ns});
+  setTimeout(function(){
+    btn.disabled=false; btn.textContent=ns==='actif'?'Suspendre':'Réactiver';
+    btn.style.color=ns==='actif'?'var(--R)':'var(--G)';
+    T(ns==='actif'?'ok':'warn',ns==='actif'?'✅ Chauffeur réactivé':'⚠️ Chauffeur suspendu');
+  },600);
+};
+
+ge('btn-adddrv').addEventListener('click',function(){openM('m-adddrv');});
+ge('btn-savedrv').addEventListener('click',function(){
+  var p=ge('nd-prenom').value.trim(),n=ge('nd-nom').value.trim(),t=ge('nd-tel').value.trim(),pin=ge('nd-pin').value.trim();
+  if(!p||!n||!t||pin.length!==4){T('err','Remplissez tous les champs (PIN 4 chiffres)');return;}
+  var btn=ge('btn-savedrv');btn.disabled=true;btn.innerHTML=SP()+' Enregistrement…';
+  // Ajouter en démo local
+  var newDrv={id:'drv-'+Date.now(),telephone:t.replace(/\s/g,''),prenom:p,nom:n,code_pin:pin,statut:'actif',solde_salaire:140000,solde_bonus:0,scans_valides_jour:0,scans_refuses_jour:0};
+  DB.chauffeurs.push(newDrv);
+  // Supabase hors Claude
+  if(!IN_CLAUDE){
+    sbPost('chauffeurs',{telephone:newDrv.telephone,prenom:p,nom:n,code_pin:pin,statut:'actif',solde_salaire:140000,solde_bonus:0}).then(function(r){
+      if(r&&r.length) newDrv.id=r[0].id;
+    });
+  }
+  setTimeout(function(){
+    btn.disabled=false;btn.textContent='✅ Enregistrer le chauffeur';
+    ['nd-prenom','nd-nom','nd-tel','nd-pin'].forEach(function(id){var e=ge(id);if(e)e.value='';});
+    closeM('m-adddrv');
+    T('ok','✅ '+p+' '+n+' enregistré !');
+  },1200);
+});
+
+ge('btn-refinc').addEventListener('click',function(){
+  if(!IN_CLAUDE){
+    sbGet('incidents','?statut=eq.ouvert&select=*,chauffeurs(nom,prenom),vehicules(code)').then(function(d){renderIncs(d||[]);});
+  } else {
+    T('info','Connexion Supabase active uniquement hors Claude.ai');
+  }
+});
+
+ge('btn-logout-A').addEventListener('click',logout);
+
+window.aNav=function(btn){
+  var t=btn.getAttribute('data-s');
+  document.querySelectorAll('.NT[data-s]').forEach(function(b){
+    if(['s-A-dash','s-A-fin','s-A-mgmt','s-A-profil'].indexOf(b.getAttribute('data-s'))>=0)
+      b.classList.toggle('ON',b.getAttribute('data-s')===t);
+  });
+  G(t);
+};
+
+// ─── LOGOUT ───
+function logout(){
+  clearInterval(ST.mapT);clearInterval(ST.etaT);clearInterval(ST.pollT);
+  ST.mode=null;ST.passager=null;ST.chauffeur=null;ST.vehicule=null;
+  document.querySelectorAll('.MV').forEach(function(m){m.classList.remove('ON');});
+  G('s-home');
+  T('info','Déconnexion réussie 👋');
+}
+window.logout=logout;
+
+// ═══════════════════════════
+//  QR CODE — Canvas natif
+// ═══════════════════════════
+function drawQR(text){
+  var cv=ge('qr-cv');if(!cv)return;
+  var ctx=cv.getContext('2d'),W=185,H=185;
+  ctx.fillStyle='#fff';ctx.fillRect(0,0,W,H);
+  var m=Math.floor(W/21),hash=0;
+  for(var i=0;i<(text||'').length;i++)hash=((hash<<5)-hash+text.charCodeAt(i))|0;
+  function finder(ox,oy){ctx.fillStyle='#111';ctx.fillRect(ox*m,oy*m,7*m,7*m);ctx.fillStyle='#fff';ctx.fillRect((ox+1)*m,(oy+1)*m,5*m,5*m);ctx.fillStyle='#111';ctx.fillRect((ox+2)*m,(oy+2)*m,3*m,3*m);}
+  finder(0,0);finder(14,0);finder(0,14);
+  ctx.fillStyle='#111';ctx.fillRect(12*m,12*m,5*m,5*m);ctx.fillStyle='#fff';ctx.fillRect(13*m,13*m,3*m,3*m);ctx.fillStyle='#111';ctx.fillRect(14*m,14*m,m,m);
+  for(var k=8;k<13;k++){ctx.fillStyle=k%2===0?'#111':'#fff';ctx.fillRect(k*m,6*m,m,m);ctx.fillRect(6*m,k*m,m,m);}
+  ctx.fillStyle='#111';
+  for(var r=0;r<21;r++)for(var c=0;c<21;c++){
+    if((r<9&&c<9)||(r<9&&c>12)||(r>12&&c<9))continue;
+    if(r===6||c===6)continue;
+    if(r>=12&&r<=16&&c>=12&&c<=16)continue;
+    if(((hash^(r*17+c*31)^(r*c*7))>>>0)&1)ctx.fillRect(c*m,r*m,m,m);
+  }
+  XT('qr-txt',text||'—');
+}
+
+// ═══════════════════════════
+//  MAP PASSAGER — Canvas animé
+// ═══════════════════════════
+function initMap(){
+  var cv=ge('cv-map');if(!cv)return;
+  cv.width=cv.offsetWidth||390;cv.height=265;
+  drawMap();
+  clearInterval(ST.mapT);
+  ST.mapT=setInterval(function(){
+    ST.buses.forEach(function(b){
+      b.x+=b.dx+(Math.random()-.5)*.003;b.y+=b.dy+(Math.random()-.5)*.003;
+      if(b.x<.04||b.x>.96)b.dx*=-1;if(b.y<.04||b.y>.96)b.dy*=-1;
+    });
+    drawMap(); updateNear();
+  },2200);
+  updateNear();
+}
+function drawMap(){
+  var cv=ge('cv-map');if(!cv)return;
+  var ctx=cv.getContext('2d'),W=cv.width,H=cv.height;
+  var g=ctx.createLinearGradient(0,0,W,H);g.addColorStop(0,'#EFF6FF');g.addColorStop(1,'#DBEAFE');
+  ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle='rgba(148,163,184,.5)';ctx.lineWidth=7;
+  [[0,H*.4,W,H*.46],[0,H*.68,W,H*.72],[W*.3,0,W*.32,H],[W*.65,0,W*.67,H]].forEach(function(r){ctx.beginPath();ctx.moveTo(r[0],r[1]);ctx.lineTo(r[2],r[3]);ctx.stroke();});
+  ctx.strokeStyle='rgba(0,181,116,.4)';ctx.lineWidth=2;ctx.setLineDash([7,5]);
+  ctx.beginPath();ctx.moveTo(0,H*.43);ctx.lineTo(W,H*.48);ctx.stroke();ctx.setLineDash([]);
+  [[.1,.43],[.3,.44],[.5,.46],[.7,.47],[.88,.48]].forEach(function(s){
+    ctx.beginPath();ctx.arc(s[0]*W,s[1]*H,5,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();ctx.strokeStyle='var(--G)';ctx.lineWidth=2;ctx.stroke();
+  });
+  ctx.fillStyle='rgba(0,181,116,.15)';ctx.beginPath();ctx.arc(W*.5,H*.52,17,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#00B574';ctx.strokeStyle='#fff';ctx.lineWidth=3;ctx.beginPath();ctx.arc(W*.5,H*.52,9,0,Math.PI*2);ctx.fill();ctx.stroke();
+  ST.buses.forEach(function(b){ctx.font='17px serif';ctx.fillText('🚌',b.x*W-9,b.y*H+5);ctx.fillStyle='rgba(30,64,175,.9)';ctx.font='bold 9px sans-serif';ctx.textAlign='center';ctx.fillText(b.lbl,b.x*W,b.y*H-10);ctx.textAlign='left';});
+}
+function updateNear(){
+  var b=ST.buses[Math.floor(Math.random()*ST.buses.length)];
+  var mins=['2 min','3 min','4 min','5 min'];
+  var m=mins[Math.floor(Math.random()*mins.length)];
+  XT('near-t',b.lbl+' · Treichville → Grand-Bassam');
+  XT('near-s',m+' · '+(22-Math.floor(Math.random()*12+4))+' places · Batterie '+b.bat+'%');
+  XT('eta-bus',b.lbl);XT('eta-min',m);
+  ge('eta-ch').classList.add('ON');
+}
+
+// ─── MAP ADMIN ───
+var AB=[];for(var ai=0;ai<24;ai++)AB.push({x:.05+Math.random()*.9,y:.1+Math.random()*.8,s:ai<20?'s':'c',dx:(Math.random()-.5)*.005,dy:(Math.random()-.5)*.005});
+function initAdminMap(){
+  var cv=ge('cv-amap');if(!cv)return;
+  cv.width=cv.offsetWidth||358;cv.height=165;drawAdminMap();
+  setInterval(function(){AB.forEach(function(b){if(b.s!=='s')return;b.x+=b.dx+(Math.random()-.5)*.002;b.y+=b.dy+(Math.random()-.5)*.002;if(b.x<.02||b.x>.98)b.dx*=-1;if(b.y<.02||b.y>.98)b.dy*=-1;});drawAdminMap();},2500);
+}
+function drawAdminMap(){
+  var cv=ge('cv-amap');if(!cv)return;
+  var ctx=cv.getContext('2d'),W=cv.width,H=cv.height;
+  var g=ctx.createLinearGradient(0,0,W,H);g.addColorStop(0,'#EFF6FF');g.addColorStop(1,'#DBEAFE');
+  ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle='rgba(148,163,184,.4)';ctx.lineWidth=4;
+  [[0,H*.43,W,H*.46],[0,H*.66,W,H*.7],[W*.4,0,W*.42,H]].forEach(function(r){ctx.beginPath();ctx.moveTo(r[0],r[1]);ctx.lineTo(r[2],r[3]);ctx.stroke();});
+  AB.forEach(function(b){ctx.fillStyle=b.s==='s'?'#00B574':'#F59E0B';ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(b.x*W,b.y*H,6,0,Math.PI*2);ctx.fill();ctx.stroke();});
+}
+
+// ─── ETA ───
+function startETA(){
+  var routes=['EV-01','EV-02','EV-03'],times=['2 min','3 min','4 min','5 min'];
+  clearInterval(ST.etaT);
+  setTimeout(function(){XT('eta-bus','EV-01');XT('eta-min','3 min');ge('eta-ch').classList.add('ON');},2500);
+  ST.etaT=setInterval(function(){XT('eta-bus',routes[Math.floor(Math.random()*3)]);XT('eta-min',times[Math.floor(Math.random()*4)]);},10000);
+}
+
+// ─── POLL (15s, uniquement hors Claude) ───
+function startPoll(){
+  if(IN_CLAUDE)return; // Pas de polling dans Claude
+  clearInterval(ST.pollT);
+  ST.pollT=setInterval(function(){
+    if(ST.mode==='passager'&&ST.passager&&ST.passager.id){
+      sbGet('passagers','?id=eq.'+ST.passager.id+'&select=*').then(function(d){if(d&&d.length){ST.passager=d[0];refreshChip(d[0]);}});
+    }
+    if(ST.mode==='chauffeur'&&ST.chauffeur&&ST.chauffeur.id){
+      sbGet('chauffeurs','?id=eq.'+ST.chauffeur.id+'&select=*').then(function(d){if(d&&d.length){ST.chauffeur=d[0];renderDUI();}});
+    }
+    if(ST.mode==='admin'){
+      sbGet('scans','?horodatage=gte.'+new Date().toISOString().split('T')[0]+'T00:00:00&resultat=eq.valide&select=id').then(function(d){if(d){XT('kpi-scans',String(d.length));XT('kpi-rev',F(d.length*3000));}});
+    }
+  },15000);
+}
+
+// ─── BOUTONS MAP ───
+ge('btn-gps').addEventListener('click',function(){
+  if(navigator.geolocation){navigator.geolocation.getCurrentPosition(function(){T('ok','📍 Position GPS actualisée');},function(){T('info','GPS non disponible — position Treichville');});}
+  else{T('info','GPS non disponible sur cet appareil');}
+});
+ge('btn-search').addEventListener('click',function(){T('info','Recherche destination · Fonctionnalité v2 📍');});
+ge('btn-nearbus').addEventListener('click',function(){T('ok','EV-02 arrive dans 3 min à CHU Treichville');});
+ge('btn-ligne1').addEventListener('click',function(){T('info','L1 · Treichville ↔ Bassam · Départs : 3min, 18min, 33min');});
+
+// Afficher un indicateur si on est dans Claude
+if(IN_CLAUDE){
+  setTimeout(function(){
+    T('info','Mode demo actif · Téléchargez le .html pour activer Supabase');
+  },3500);
+}
+
+})();
+</script>
+</body>
+</html>
